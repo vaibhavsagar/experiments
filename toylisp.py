@@ -114,4 +114,4 @@ def eval(x, env=global_env):
 
 yacc.yacc()
 rep = lambda s: eval(yacc.parse(s))
-if __name__="__main__": print(eval(yacc.parse("(cons 3 '())")))
+if __name__=="__main__": print(eval(yacc.parse("(cons 3 '())")))
