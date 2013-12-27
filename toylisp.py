@@ -9,6 +9,8 @@ Help and guidance from:
 import ply.lex  as lex
 import ply.yacc as yacc
 
+# Lexing
+
 tokens = (
     'ATOM',
     'QUOTE',
@@ -31,6 +33,7 @@ def t_error(t):
 
 lex.lex()
 
+# Parsing
 
 def p_expr(p):
     '''expr : ATOM
@@ -51,10 +54,17 @@ def p_seq(p):
 def p_error(p):
     print("Syntax error in input!")
 
+yacc.yacc()
+
+# Interpretation
+
 def atom(token):
     "Numbers become numbers; every other token is a symbol."
     try: return int(token)
     except ValueError: return str(token)
+
+is_atom    = lambda v: isinstance(v, str)
+is_literal = lambda v: not isinstance(v, list)
 
 class Env(dict):
     "An environment: a dict of {'var':val} pairs, with an outer Env."
@@ -85,44 +95,52 @@ def add_globals(env):
         'cons': lambda x,y:[x]+y,
         'car':  lambda x:x[0],
         'cdr':  lambda x:x[1:],
-        'atom?':lambda x: isinstance(x, str),
+        'atom?':is_atom,
         'else': True
     })
     return env
 
 global_env = add_globals(Env())
 
-def notfound(var):
+def notbound(var):
     raise NameError("symbol '%s' is not bound to a value" % var)
 
 def eval(e, env=global_env):
     "Evaluate an expression in an environment."
-    if isinstance(e, str):         # variable reference
+    if is_atom(e):          # variable reference
         value = env.find(e)
-        return value if value is not None else notfound(e)
-    elif not isinstance(e, list):  # constant literal
+        return value if value is not None else notbound(e)
+    elif is_literal(e):     # constant literal
         return e                
-    elif e[0] == 'quote':          # (quote exp)
+    elif e[0] == 'quote':  # (quote exp)
         (_, exp) = e
         return exp
-    elif e[0] == 'cond':             # (if test conseq alt)
+    elif e[0] == 'cond':   # (if test conseq alt)
         (_, *forms) = e
         for test, result in forms:
             if eval(test, env):
                 return eval(result, env)
-    elif e[0] == 'define':         # (define var exp)
+    elif e[0] == 'define': # (define var exp)
         (_, var, exp) = e
         env[var] = eval(exp, env)
-    elif e[0] == 'lambda':         # (lambda (var*) exp)
+    elif e[0] == 'lambda': # (lambda (var*) exp)
         (_, vars, exp) = e
         return lambda *args: eval(exp, Env(vars, args, env))
-    else:                          # (proc exp*)
+    else:                  # (proc exp*)
         exps = [eval(exp, env) for exp in e]
         proc = exps.pop(0)
         return proc(*exps)
 
+def lispify(value):
+    return str(value) if is_literal(value) else "("+(" ".join(
+        lispify(v) for v in value))+")"
 
+rep = lambda s: lispify(eval(yacc.parse(s)))
 
-yacc.yacc()
-rep = lambda s: eval(yacc.parse(s))
-if __name__=="__main__": print(rep("(cons 3 '())"))
+if __name__=="__main__":
+    rep('''
+    (define fact
+        (lambda (n) 
+            (cond ((eq? n 1) 1)
+                  (else (* n (fact (- n 1)))))))''')
+    print(rep("(fact 5)"))
