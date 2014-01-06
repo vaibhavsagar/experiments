@@ -1,5 +1,5 @@
 '''
-Help and guidance from:
+Help, guidance and core functions from:
 1. http://norvig.com/lispy.html
 2. http://theory.stanford.edu/~amitp/yapps/yapps-doc/node2.html for grammar
 3. http://www.dabeaz.com/ply/ply.html
@@ -21,12 +21,14 @@ tokens = (
 t_LPAREN  = r'\('
 t_RPAREN  = r'\)'
 t_QUOTE   = r'\''
+
 def t_ATOM(t):
     r'[^\s\)\(\']+'
     t.value=atom(t.value)
     return t
 
 t_ignore  = ' \t\n'
+
 def t_error(t):
     print("Illegal character '%s'" % t.value[0])
     t.lexer.skip(1)
