@@ -78,7 +78,7 @@ class Env(dict):
         return self.get(var, self.outer.find(var) if self.outer else None)
 
 def add_globals(env):
-    "Add some Scheme standard procedures to an environment."
+    "Add some Lisp standard procedures to an environment."
     import operator as op
     from functools import reduce
     reducer = lambda o: lambda *args: reduce(o, args)
