@@ -52,7 +52,7 @@ def p_seq(p):
             | expr seq'''
     if len(p)==1: p[0]=[]
     else: p[0]=[p[1]]+p[2]
-    
+
 def p_error(p):
     print("Syntax error in input!")
 
@@ -113,7 +113,7 @@ def eval(e, env=global_env):
         value = env.find(e)
         return value if value is not None else notbound(e)
     elif is_literal(e):     # constant literal
-        return e                
+        return e
     elif e[0] == 'quote':  # (quote exp)
         (_, exp) = e
         return exp
@@ -142,7 +142,7 @@ rep = lambda s: lispify(eval(yacc.parse(s)))
 if __name__=="__main__":
     rep('''
     (define fact
-        (lambda (n) 
+        (lambda (n)
             (cond ((eq? n 1) 1)
                   (else (* n (fact (- n 1)))))))''')
     print(rep("(fact 5)"))

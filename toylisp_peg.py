@@ -1,6 +1,5 @@
 ''' Some code from https://github.com/halst/mini/blob/master/mini.py'''
 
-import operator as op
 from parsimonious.grammar import Grammar
 from sys import exit
 
@@ -43,20 +42,21 @@ is_literal = lambda v: not isinstance(v, list)
 def notbound(var): raise NameError("symbol '%s' is not bound to a value" % var)
 
 class Lisp:
-    
+
     def __init__(self, env=add_globals(Env())):
         self.env=env
-    
+        self.grammar = Grammar('\n'.join(
+            v.__doc__ for k, v in vars(self.__class__).items()
+            if '__' not in k and hasattr(v, '__doc__') and v.__doc__))
+
     def parse(self, source):
-        grammar = '\n'.join(v.__doc__ for k, v in vars(self.__class__).items()
-                      if '__' not in k and hasattr(v, '__doc__') and v.__doc__)
-        return Grammar(grammar)['expr'].parse(source)
+        return self.grammar['expr'].parse(source)
 
     def ast(self, source):
         node = self.parse(source) if isinstance(source, str) else source
         method = getattr(self, node.expr_name, lambda node, children: children)
         return method(node, [self.ast(n) for n in node])
-    
+
     def eval(self, e, env=None):
         # Evaluate an expression in an environment
         if env is None: env = self.env
@@ -64,7 +64,7 @@ class Lisp:
             value = env.find(e)
             return value if value is not None else notbound(e)
         elif is_literal(e):     # constant literal
-            return e                
+            return e
         elif e[0] == 'quote':  # (quote exp)
             (_, exp) = e
             return exp
@@ -83,19 +83,19 @@ class Lisp:
             exps = [self.eval(exp, env) for exp in e]
             proc = exps.pop(0)
             return proc(*exps)
-    
+
     def expr(self, node, children):
         '''expr = _ (list / quoted / atom) _'''
         return children[1][0]
-    
+
     def quoted(self, node, children):
         '''quoted = "'" expr'''
         return ['quote', children[1]]
-    
+
     def list(self, node, children):
         '''list = "(" expr* ")"'''
         return children[1]
-    
+
     def atom(self, node, children):
         '''atom = ~r"[^\s\)\(\']+"'''
         try:
@@ -103,7 +103,7 @@ class Lisp:
         except:
             result = node.text
         return result
-    
+
     def _(self, node, children):
         '''_ = ~"\s*"'''
 
@@ -115,9 +115,7 @@ if __name__=="__main__":
     L = Lisp()
     L.eval(L.ast('''
     (define fact
-        (lambda (n) 
+        (lambda (n)
             (cond ((eq? n 1) 1)
                   (else (* n (fact (- n 1)))))))'''))
     print(L.eval(L.ast("(fact 5)")))
-    
-
