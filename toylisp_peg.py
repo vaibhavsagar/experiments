@@ -1,16 +1,18 @@
 ''' Some code from https://github.com/halst/mini/blob/master/mini.py'''
 
 from parsimonious.grammar import Grammar
-from sys import exit
+
 
 class Env(dict):
     "An environment: a dict of {'var':val} pairs, with an outer Env."
     def __init__(self, params=(), args=(), outer=None):
-        self.update(zip(params,args))
+        self.update(zip(params, args))
         self.outer = outer
+
     def find(self, var):
         "Find the innermost Env where var appears."
         return self.get(var, self.outer.find(var) if self.outer else None)
+
 
 def add_globals(env):
     "Add some Lisp standard procedures to an environment."
@@ -29,22 +31,24 @@ def add_globals(env):
         '<=': op.le,
         '=': op.eq,
         'eq?': op.eq,
-        'cons': lambda x,y:[x]+y,
-        'car': lambda x:x[0],
-        'cdr': lambda x:x[1:],
+        'cons': lambda x, y: [x]+y,
+        'car': lambda x: x[0],
+        'cdr': lambda x: x[1:],
         'atom?': is_atom,
         'else': True
     })
     return env
 
-is_atom    = lambda v: isinstance(v, str)
+is_atom = lambda v: isinstance(v, str)
 is_literal = lambda v: not isinstance(v, list)
+
 def notbound(var): raise NameError("symbol '%s' is not bound to a value" % var)
+
 
 class Lisp:
 
     def __init__(self, env=add_globals(Env())):
-        self.env=env
+        self.env = env
         self.grammar = Grammar('\n'.join(
             v.__doc__ for k, v in vars(self.__class__).items()
             if '__' not in k and hasattr(v, '__doc__') and v.__doc__))
@@ -65,21 +69,21 @@ class Lisp:
             return value if value is not None else notbound(e)
         elif is_literal(e):     # constant literal
             return e
-        elif e[0] == 'quote':  # (quote exp)
+        elif e[0] == 'quote':   # (quote exp)
             (_, exp) = e
             return exp
-        elif e[0] == 'cond':   # (if test conseq alt)
+        elif e[0] == 'cond':    # (if test conseq alt)
             (_, *forms) = e
             for test, result in forms:
                 if self.eval(test, env):
                     return self.eval(result, env)
-        elif e[0] == 'define': # (define var exp)
+        elif e[0] == 'define':  # (define var exp)
             (_, var, exp) = e
             env[var] = self.eval(exp, env)
-        elif e[0] == 'lambda': # (lambda (var*) exp)
+        elif e[0] == 'lambda':  # (lambda (var*) exp)
             (_, vars, exp) = e
             return lambda *args: self.eval(exp, Env(vars, args, env))
-        else:                  # (proc exp*)
+        else:                   # (proc exp*)
             exps = [self.eval(exp, env) for exp in e]
             proc = exps.pop(0)
             return proc(*exps)
@@ -107,11 +111,13 @@ class Lisp:
     def _(self, node, children):
         '''_ = ~"\s*"'''
 
+
 def lispify(value):
     return str(value) if is_literal(value) else "("+(" ".join(
         lispify(v) for v in value))+")"
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     L = Lisp()
     L.eval(L.ast('''
     (define fact
