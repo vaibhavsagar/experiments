@@ -50,8 +50,10 @@ def p_list(p):
 def p_seq(p):
     ''' seq :
             | expr seq'''
-    if len(p) == 1: p[0] = []
-    else: p[0] = [p[1]] + p[2]
+    if len(p) == 1:
+        p[0] = []
+    else:
+        p[0] = [p[1]] + p[2]
 
 
 def p_error(p):
@@ -61,10 +63,13 @@ yacc.yacc()
 
 # Interpretation
 
+
 def atom(token):
     "Numbers become numbers; every other token is a symbol."
-    try: return int(token)
-    except ValueError: return str(token)
+    try:
+        return int(token)
+    except ValueError:
+        return str(token)
 
 is_atom = lambda v: isinstance(v, str)
 is_literal = lambda v: not isinstance(v, list)
@@ -87,22 +92,22 @@ def add_globals(env):
     from functools import reduce
     reducer = lambda o: lambda *args: reduce(o, args)
     env.update({
-        '+':     reducer(op.add),
-        '-':     reducer(op.sub),
-        '*':     reducer(op.mul),
-        '/':     reducer(op.truediv),
-        'not':   op.not_,
-        '>':     op.gt,
-        '<':     op.lt,
-        '>=':    op.ge,
-        '<=':    op.le,
-        '=':     op.eq,
-        'eq?':   op.eq,
-        'cons':  lambda x,y:[x]+y,
-        'car':   lambda x:x[0],
-        'cdr':   lambda x:x[1:],
+        '+': reducer(op.add),
+        '-': reducer(op.sub),
+        '*': reducer(op.mul),
+        '/': reducer(op.truediv),
+        'not': op.not_,
+        '>':  op.gt,
+        '<':  op.lt,
+        '>=': op.ge,
+        '<=': op.le,
+        '=':  op.eq,
+        'eq?': op.eq,
+        'cons': lambda x, y: [x]+y,
+        'car': lambda x: x[0],
+        'cdr': lambda x: x[1:],
         'atom?': is_atom,
-        'else':  True
+        'else': True
     })
     return env
 
