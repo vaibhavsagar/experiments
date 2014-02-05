@@ -42,7 +42,9 @@ def add_globals(env):
 is_atom = lambda v: isinstance(v, str)
 is_literal = lambda v: not isinstance(v, list)
 
-def notbound(var): raise NameError("symbol '%s' is not bound to a value" % var)
+
+def notbound(var):
+    raise NameError("symbol '%s' is not bound to a value" % var)
 
 
 class Lisp:
@@ -63,7 +65,8 @@ class Lisp:
 
     def eval(self, e, env=None):
         # Evaluate an expression in an environment
-        if env is None: env = self.env
+        if env is None:
+            env = self.env
         if is_atom(e):          # variable reference
             value = env.find(e)
             return value if value is not None else notbound(e)
