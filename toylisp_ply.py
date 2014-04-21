@@ -3,7 +3,6 @@ Help, guidance and core functions from:
 1. http://norvig.com/lispy.html
 2. http://theory.stanford.edu/~amitp/yapps/yapps-doc/node2.html for grammar
 3. http://www.dabeaz.com/ply/ply.html
-
 '''
 
 import ply.lex as lex
