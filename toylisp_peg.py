@@ -1,4 +1,4 @@
-''' Some code from https://github.com/halst/mini/blob/master/mini.py'''
+''' Some code from https://github.com/keleshev/mini/blob/master/mini.py'''
 
 from parsimonious.grammar import Grammar
 
