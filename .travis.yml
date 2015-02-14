@@ -4,6 +4,7 @@ language: haskell
 install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq  pandoc texlive
+  - sudo tlmgr install fullpage
 script: make
 notifications:
   email:
