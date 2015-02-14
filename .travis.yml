@@ -1,0 +1,21 @@
+branches:
+  only: master
+language: haskell
+install:
+    - sudo apt-get add-apt-repository -y ppa:texlive-backports/ppa
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq  pandoc texlive
+script: make
+notifications:
+  email:
+    on_success: always
+    on_failure: always
+after_success: bash deploy.sh
+deploy:
+    provider: releases
+    api_key:
+        secure: F80xU1pmq9JMpN5XCeBsIG/XCerFgs8/9yIFHELbt8Dd+yPck0HNe/SfHpXQeb3J58u0qh70sxCHwpL2DBhqLCWwAglyV+BRVg2HRpBdHOcE/8GcPABGlRgWTqJDXivV3fKHeNFyEfKvlZKCMl1tZv9WK6R2m/ySV8iG4YGD4WU=
+    file: Vaibhav_Sagar_resume.pdf
+    on:
+        repo: vaibhavsagar/resumate
+        tags: true
