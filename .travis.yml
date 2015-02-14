@@ -1,11 +1,9 @@
 branches:
   only: master
 language: haskell
-install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq  pandoc texlive
-  - tlmgr install fullpage booktabs
-script: make
+script:
+    - make html
+    - make readme
 notifications:
   email:
     on_success: always
