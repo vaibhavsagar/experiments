@@ -2,7 +2,6 @@ branches:
   only: master
 language: haskell
 install:
-    - sudo apt-get update -qq
     - cabal install pandoc
 script:
     - make html
