@@ -8,12 +8,11 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
         git config --global user.email "travis@travis-ci.org"
         git config --global user.name "Travis"
     fi
-    ls -al
     # using token clone gh-pages branch
     git clone --quiet --branch=$BRANCH https://${GH_TOKEN}@github.com/$TARGET_REPO build > /dev/null
     # go into directory and copy data we're interested in to that directory
     cd build
-    cp ../README.md ../index.html .
+    cp ../readme.md ../index.html .
     # add, commit and push files
     git add -f .
     git commit -m "Travis build $TRAVIS_BUILD_NUMBER pushed to Github Pages"
