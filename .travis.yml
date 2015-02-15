@@ -1,9 +1,7 @@
 branches:
   only: master
 language: c
-install:
-    - wget https://github.com/jgm/pandoc/releases/download/1.13.2/pandoc-1.13.2-1-amd64.deb -O pandoc.deb
-    - sudo dpkg -i pandoc.deb
+install: bash prepare.sh
 script:
     - make html
     - make readme
