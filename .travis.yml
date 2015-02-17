@@ -2,9 +2,7 @@ branches:
   only: master
 language: c
 install: bash prepare.sh
-script:
-    - make html
-    - make readme
+script: make
 notifications:
   email:
     on_success: always
