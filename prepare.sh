@@ -9,6 +9,6 @@ wget http://mirror.as24220.net/pub/ctan/systems/texlive/tlnet/install-tl-unx.tar
 tar xf install-tl-unx.tar.gz
 install-tl-*/install-tl -profile texlive.profile
 sudo apt-get install xzdec -y
-alias tlmgr=/usr/local/texlive/20*/bin/x86_64-linux/tlmgr
+alias tlmgr="/usr/local/texlive/20*/bin/x86_64-linux/tlmgr"
 tlmgr init-usertree
 tlmgr install booktabs preprint
