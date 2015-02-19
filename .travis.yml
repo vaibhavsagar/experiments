@@ -2,7 +2,9 @@ branches:
   only: master
 language: c
 install: bash prepare.sh
-script: make
+script:
+    - export PATH=/usr/local/texlive/2014/bin/x86_64-linux:$PATH
+    - make
 notifications:
   email:
     on_success: always
