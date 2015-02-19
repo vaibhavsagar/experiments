@@ -9,7 +9,7 @@ wget http://mirrors.ibiblio.org/CTAN/systems/texlive/tlnet/install-tl-unx.tar.gz
 tar xf install-tl-unx.tar.gz
 sudo install-tl-*/install-tl -profile texlive.profile
 sudo apt-get install xzdec -y
-alias tlmgr="/usr/local/texlive/2014/bin/x86_64-linux/tlmgr"
-alias pdflatex="/usr/local/texlive/2014/bin/x86_64-linux/pdflatex"
+sudo ln -s /usr/local/texlive/2014/bin/x86_64-linux/tlmgr /usr/local/bin/tlmgr
+sudo ln -s /usr/local/texlive/2014/bin/x86_64-linux/pdflates /usr/local/bin/pdflatex
 sudo tlmgr init-usertree
 sudo tlmgr install booktabs preprint
