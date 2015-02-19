@@ -1,7 +1,7 @@
 # texlive.profile written on Tue Feb 17 09:22:58 2015 UTC
 # It will NOT be updated and reflects only the
 # installation profile at installation time.
-selected_scheme scheme-basic
+selected_scheme scheme-small
 TEXDIR /usr/local/texlive/2014
 TEXMFCONFIG ~/.texlive2014/texmf-config
 TEXMFHOME ~/texmf
