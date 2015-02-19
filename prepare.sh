@@ -11,4 +11,4 @@ sudo install-tl-*/install-tl -profile texlive.profile
 sudo apt-get install xzdec -y
 export PATH=/usr/local/texlive/2014/bin/x86_64-linux:$PATH
 sudo env PATH="$PATH" tlmgr init-usertree
-sudo env PATH="$PATH" tlmgr install booktabs preprint
+sudo env PATH="$PATH" tlmgr install booktabs preprint lmodern
