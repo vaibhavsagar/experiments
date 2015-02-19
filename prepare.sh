@@ -11,5 +11,5 @@ sudo install-tl-*/install-tl -profile texlive.profile
 sudo apt-get install xzdec -y
 sudo ln -s /usr/local/texlive/2014/bin/x86_64-linux/tlmgr /usr/local/bin/tlmgr
 sudo ln -s /usr/local/texlive/2014/bin/x86_64-linux/pdflates /usr/local/bin/pdflatex
-sudo tlmgr init-usertree
-sudo tlmgr install booktabs preprint
+sudo /usr/local/texlive/2014/bin/x86_64-linux/tlmgr init-usertree
+sudo /usr/local/texlive/2014/bin/x86_64-linux/tlmgr install booktabs preprint
