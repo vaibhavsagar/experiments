@@ -3,13 +3,14 @@ branches:
 language: c
 install: bash prepare.sh
 script:
-    - export PATH=/usr/local/texlive/2014/bin/x86_64-linux:$PATH
-    - make
+    - make readme
+    - make html
 notifications:
   email:
     on_success: always
     on_failure: always
 after_success: bash deploy.sh
+before_deploy: bash getlatex.sh
 deploy:
   provider: releases
   api_key:
