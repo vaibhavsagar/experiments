@@ -18,6 +18,7 @@ deploy:
   file: Vaibhav_Sagar_resume.pdf
   on:
     repo: vaibhavsagar/resumate
+    all_branches: true
     tags: true
 env:
   global:

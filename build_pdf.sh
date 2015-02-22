@@ -7,3 +7,4 @@ export PATH=/usr/local/texlive/2014/bin/x86_64-linux:$PATH
 sudo apt-get -y install xzdec
 sudo env PATH="$PATH" tlmgr init-usertree
 sudo env PATH="$PATH" tlmgr install booktabs preprint lm ec titling
+make pdf
