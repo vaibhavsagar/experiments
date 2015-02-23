@@ -9,7 +9,9 @@ notifications:
   email:
     on_success: always
     on_failure: always
-after_success: bash update_pages.sh
+after_success:
+    - bash update_pages.sh
+    - echo $TRAVIS_TAG
 before_deploy: bash build_pdf.sh
 deploy:
   provider: releases
