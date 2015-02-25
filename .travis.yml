@@ -1,5 +1,3 @@
-branches:
-  only: master
 language: c
 install: bash prepare.sh
 script:
