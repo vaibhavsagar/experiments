@@ -1,10 +1,10 @@
 all: pdf html readme
 
-pdf: resume.md resume_header.tex
-	pandoc resume.md -H resume_header.tex -o Vaibhav_Sagar_resume.pdf
+pdf: resume.md templates/resume_header.tex
+	pandoc resume.md -H templates/resume_header.tex -o Vaibhav_Sagar_resume.pdf
 
-html: resume.md resume_template.css
-	pandoc resume.md -s -H resume_template.css -o index.html
+html: resume.md templates/resume_template.css
+	pandoc resume.md -s -H templates/resume_template.css -o index.html
 
 readme: resume.md
 	pandoc resume.md -t markdown_github -o readme.md
