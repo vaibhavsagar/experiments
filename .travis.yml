@@ -1,5 +1,5 @@
 language: c
-install: bash build/prepare.sh
+install: bash .ci/prepare.sh
 script:
 - make readme
 - make html
@@ -7,8 +7,8 @@ notifications:
   email:
     on_success: always
     on_failure: always
-after_success: bash build/update_pages.sh
-before_deploy: bash build/build_pdf.sh
+after_success: bash .ci/update_pages.sh
+before_deploy: bash .ci/build_pdf.sh
 deploy:
   provider: releases
   api_key:
