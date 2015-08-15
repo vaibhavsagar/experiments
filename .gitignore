@@ -218,3 +218,6 @@ pip-log.txt
 
 # Git
 .gitattributes
+
+# Virtualenvs
+toylisp
