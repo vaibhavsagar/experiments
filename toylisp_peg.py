@@ -1,50 +1,8 @@
 ''' Some code from https://github.com/keleshev/mini/blob/master/mini.py'''
 
 from parsimonious.grammar import Grammar
-
-
-class Env(dict):
-    "An environment: a dict of {'var':val} pairs, with an outer Env."
-    def __init__(self, params=(), args=(), outer=None):
-        self.update(zip(params, args))
-        self.outer = outer
-
-    def find(self, var):
-        "Find the innermost Env where var appears."
-        return self.get(var, self.outer.find(var) if self.outer else None)
-
-
-def add_globals(env):
-    "Add some Lisp standard procedures to an environment."
-    import operator as op
-    from functools import reduce
-    reducer = lambda o: lambda *args: reduce(o, args)
-    env.update({
-        '+': reducer(op.add),
-        '-': reducer(op.sub),
-        '*': reducer(op.mul),
-        '/': reducer(op.truediv),
-        'not':  op.not_,
-        '>': op.gt,
-        '<': op.lt,
-        '>=': op.ge,
-        '<=': op.le,
-        '=': op.eq,
-        'eq?': op.eq,
-        'cons': lambda x, y: [x]+y,
-        'car': lambda x: x[0],
-        'cdr': lambda x: x[1:],
-        'atom?': is_atom,
-        'else': True
-    })
-    return env
-
-is_atom = lambda v: isinstance(v, str)
-is_literal = lambda v: not isinstance(v, list)
-
-
-def notbound(var):
-    raise NameError("symbol '%s' is not bound to a value" % var)
+from interpreter import Env, add_globals
+from interpreter import eval as interpreter_eval
 
 
 class Lisp:
@@ -67,29 +25,7 @@ class Lisp:
         # Evaluate an expression in an environment
         if env is None:
             env = self.env
-        if is_atom(e):          # variable reference
-            value = env.find(e)
-            return value if value is not None else notbound(e)
-        elif is_literal(e):     # constant literal
-            return e
-        elif e[0] == 'quote':   # (quote exp)
-            (_, exp) = e
-            return exp
-        elif e[0] == 'cond':    # (if test conseq alt)
-            (_, *forms) = e
-            for test, result in forms:
-                if self.eval(test, env):
-                    return self.eval(result, env)
-        elif e[0] == 'define':  # (define var exp)
-            (_, var, exp) = e
-            env[var] = self.eval(exp, env)
-        elif e[0] == 'lambda':  # (lambda (var*) exp)
-            (_, vars, exp) = e
-            return lambda *args: self.eval(exp, Env(vars, args, env))
-        else:                   # (proc exp*)
-            exps = [self.eval(exp, env) for exp in e]
-            proc = exps.pop(0)
-            return proc(*exps)
+        return interpreter_eval(e, env)
 
     def expr(self, node, children):
         '''expr = _ (list / quoted / atom) _'''
@@ -113,12 +49,6 @@ class Lisp:
 
     def _(self, node, children):
         '''_ = ~"\s*"'''
-
-
-def lispify(value):
-    return str(value) if is_literal(value) else "("+(" ".join(
-        lispify(v) for v in value))+")"
-
 
 if __name__ == "__main__":
     L = Lisp()
