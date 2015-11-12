@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 
+from __future__ import print_function
+from sys import version_info
+
+if version_info.major == 2:
+    input = raw_input
+
 invert = lambda board: list(zip(*board))
 three = lambda row: row[0] == row[1] == row[2] != ' '
 empty = lambda board, indices: board[indices[0]][indices[1]] == ' '
 
 
 def update(board, indices, player):
-    new_board = [row.copy() for row in board]
+    new_board = [[item for item in row] for row in board]
     new_board[indices[0]][indices[1]] = player
     return new_board
 
