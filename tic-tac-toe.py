@@ -58,8 +58,9 @@ def main():
         [' ', ' ', ' ']
     ]
     players = {0: 'x', 1: 'o'}
-    player = 0
+    player = 1
     while not finished(board):
+        player = 0 if player else 1
         print(display(board))
         validated_move = validated(input(
             "Place an %s on the board at: " % players[player]))
@@ -69,8 +70,6 @@ def main():
         board = update(board, validated_move, players[player])
         if finished(board):
             break
-        else:
-            player = 0 if player else 1
     print(display(board))
     print("Player %s wins!" % (player+1))
 
