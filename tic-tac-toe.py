@@ -59,7 +59,8 @@ def main():
     ]
     players = {0: 'x', 1: 'o'}
     player = 1
-    while not finished(board):
+    moves = 0
+    while not finished(board) and moves < 9:
         player = 0 if player else 1
         print(display(board))
         validated_move = validated(input(
@@ -68,10 +69,12 @@ def main():
             validated_move = validated(input(
                 "Your previous move was invalid, please enter another: "))
         board = update(board, validated_move, players[player])
-        if finished(board):
-            break
-    print(display(board))
-    print("Player %s wins!" % (player+1))
+        moves += 1
+    if finished(board):
+        print(display(board))
+        print("Player %s wins!" % (player+1))
+    else:
+        print("Stalemate!")
 
 if __name__ == '__main__':
     main()
