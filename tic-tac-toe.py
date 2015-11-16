@@ -6,30 +6,49 @@ from sys import version_info
 if version_info.major == 2:
     input = raw_input
 
-invert = lambda board: list(zip(*board))
-three = lambda row: row[0] == row[1] == row[2] != ' '
-empty = lambda board, indices: board[indices[0]][indices[1]] == ' '
 
+class Board(object):
+    def __init__(self, board=None):
+        if board is not None:
+            self.board = board
+        else:
+            self.board = [
+                [' ', ' ', ' '],
+                [' ', ' ', ' '],
+                [' ', ' ', ' ']
+            ]
 
-def update(board, indices, player):
-    new_board = [[item for item in row] for row in board]
-    new_board[indices[0]][indices[1]] = player
-    return new_board
+    def __repr__(self):
+        return ('\n-----\n'.join('|'.join(row) for row in self.board))
 
+    @staticmethod
+    def invert(board):
+        return list(zip(*board))
 
-def finished(board):
-    inverted = invert(board)
-    possibilities = map(three, [
-        board[0],
-        board[1],
-        board[2],
-        inverted[0],
-        inverted[1],
-        inverted[2],
-        [board[0][0], board[1][1], board[2][2]],
-        [board[0][2], board[1][1], board[2][0]]
-    ])
-    return any(possibilities)
+    @staticmethod
+    def three(row):
+        return row[0] == row[1] == row[2] != ' '
+
+    def empty(self, indices):
+        return self.board[indices[0]][indices[1]] == ' '
+
+    def update(self, indices, player):
+        self.board[indices[0]][indices[1]] = player
+
+    def finished(self):
+        board = self.board
+        inverted = self.invert(board)
+        possibilities = map(self.three, [
+            board[0],
+            board[1],
+            board[2],
+            inverted[0],
+            inverted[1],
+            inverted[2],
+            [board[0][0], board[1][1], board[2][2]],
+            [board[0][2], board[1][1], board[2][0]]
+        ])
+        return any(possibilities)
 
 
 def validated(move):
@@ -47,31 +66,23 @@ def validated(move):
     return False
 
 
-def display(board):
-    return ('\n-----\n'.join('|'.join(row) for row in board))
-
-
 def main():
-    board = [
-        [' ', ' ', ' '],
-        [' ', ' ', ' '],
-        [' ', ' ', ' ']
-    ]
+    board = Board()
     players = {0: 'x', 1: 'o'}
     player = 1
     moves = 0
-    while not finished(board) and moves < 9:
+    while not board.finished() and moves < 9:
         player = 0 if player else 1
-        print(display(board))
+        print(board)
         validated_move = validated(input(
             "Place an %s on the board at: " % players[player]))
-        while not (validated_move and empty(board, validated_move)):
+        while not (validated_move and board.empty(validated_move)):
             validated_move = validated(input(
                 "Your previous move was invalid, please enter another: "))
-        board = update(board, validated_move, players[player])
+        board.update(validated_move, players[player])
         moves += 1
-    if finished(board):
-        print(display(board))
+    if board.finished():
+        print(board)
         print("Player %s wins!" % (player+1))
     else:
         print("Stalemate!")
