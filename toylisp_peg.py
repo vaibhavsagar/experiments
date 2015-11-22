@@ -2,7 +2,7 @@
 
 from parsimonious.grammar import Grammar
 from interpreter import Env, add_globals
-from interpreter import eval as interpreter_eval
+from interpreter import eval as lispeval
 
 
 class Lisp:
@@ -25,7 +25,7 @@ class Lisp:
         # Evaluate an expression in an environment
         if env is None:
             env = self.env
-        return interpreter_eval(e, env)
+        return lispeval(e, env)
 
     def expr(self, node, children):
         '''expr = _ (list / quoted / atom) _'''
