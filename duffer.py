@@ -102,7 +102,7 @@ class Tree(GitObject):
     @property
     def store(self):
         entries = []
-        for obj in self.content:
+        for obj in sorted(self.content, key=lambda entry: entry.name):
             entries.append(obj.entry)
         content = b''.join(entries)
         header = 'tree ' + str(len(content)) + '\x00'
