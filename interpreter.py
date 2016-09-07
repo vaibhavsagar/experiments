@@ -5,6 +5,7 @@ Help, guidance and core functions from:
 3. http://www.dabeaz.com/ply/ply.html
 '''
 
+
 def atom(token):
     "Numbers become numbers; every other token is a symbol."
     try:
