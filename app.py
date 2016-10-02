@@ -9,9 +9,6 @@ content = """
   <meta charset="utf-8">
   <meta name="viewport" content="height=1920, width=1080">
   <style type="text/css">
-    body {
-      margin: 0;
-    }
   </style>
 </head>
 <body style="width: 1080px; height: 1920px; margin: 0; position: absolute; top: 0; left: 0;">
