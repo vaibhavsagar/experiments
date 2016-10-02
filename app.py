@@ -4,8 +4,16 @@ app = Flask(__name__)
 port = int(environ.get('PORT', 5000))
 
 content = """
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="height=1920, width=1080">
+  <style type="text/css">
+    body {
+      margin: 0;
+    }
+  </style>
+</head>
 <body style="width: 1080px; height: 1920px; margin: 0; position: absolute; top: 0; left: 0;">
-    <meta name="viewport" content="width=1080, height=1920, initial-scale=1">
     <iframe
         id="main"
         src="{}"
