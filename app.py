@@ -7,7 +7,7 @@ content = """
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="height=1920, width=1080">
+  <meta name="viewport" content="height=1920, width=1080, initial-scale=1">
   <style type="text/css">
   </style>
 </head>
