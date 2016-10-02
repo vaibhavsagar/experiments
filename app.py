@@ -5,6 +5,7 @@ port = int(environ.get('PORT', 5000))
 
 content = """
 <body style="width: 1080px; height: 1920px; margin: 0; position: absolute; top: 0; left: 0;">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <iframe
         id="main"
         src="{}"
