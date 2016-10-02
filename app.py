@@ -4,6 +4,7 @@ app = Flask(__name__)
 port = int(environ.get('PORT', 5000))
 
 content = """
+<html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="height=1920, width=1080">
@@ -22,7 +23,9 @@ content = """
         height=1080
         style="transform: rotate(90deg) translate(26em, 26em)" target="_parent">
     </iframe>
-</body>"""
+</body>
+</html>
+"""
 
 
 @app.route('/')
