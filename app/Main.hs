@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import Driftwood
 
 main :: IO ()
 main = someFunc
