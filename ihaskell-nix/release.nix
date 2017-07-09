@@ -22,9 +22,9 @@ let
         "ihaskell-juicypixels"
         "ihaskell-magic"
         "ihaskell-plot"
-        # "ihaskell-rlangqq"
+        "ihaskell-rlangqq"
         "ihaskell-static-canvas"
-        # "ihaskell-widgets"
+        "ihaskell-widgets"
       ]);
   haskellPackages = pkgs.haskellPackages.override {
     overrides = self: super: {
