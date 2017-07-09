@@ -9,21 +9,46 @@ let
     sha256 = "0i3xkvj703da90bdhbfyyb2ihyny23mvkxay1jzxj2clj1a9d05r";
   };
   dontCheck = pkgs.haskell.lib.dontCheck;
+  displays = self: builtins.listToAttrs (
+    map
+      (display: { name = display; value = self.callCabal2nix display "${src}/ihaskell-display/${display}" {}; })
+      [
+        "ihaskell-aeson"
+        "ihaskell-blaze"
+        "ihaskell-charts"
+        "ihaskell-diagrams"
+        "ihaskell-gnuplot"
+        "ihaskell-hatex"
+        "ihaskell-juicypixels"
+        "ihaskell-magic"
+        "ihaskell-plot"
+        # "ihaskell-rlangqq"
+        "ihaskell-static-canvas"
+        # "ihaskell-widgets"
+      ]);
   haskellPackages = pkgs.haskellPackages.override {
     overrides = self: super: {
-      ihaskell       = dontCheck (
-                          self.callCabal2nix "ihaskell"          src                                   { bin-package-db = null; });
-      ghc-parser        = self.callCabal2nix "ghc-parser"     "${src}/ghc-parser"                      {};
-      ipython-kernel    = self.callCabal2nix "ghc-parser"     "${src}/ipython-kernel"                  {};
-      ihaskell-blaze    = self.callCabal2nix "ihaskell-blaze" "${src}/ihaskell-display/ihaskell-blaze" {};
-      ihaskell-diagrams = self.callCabal2nix "ihaskell-blaze" "${src}/ihaskell-display/ihaskell-blaze" {};
-    };
+      ihaskell          = dontCheck (
+                          self.callCabal2nix "ihaskell"          src                  { bin-package-db = null; });
+      ghc-parser        = self.callCabal2nix "ghc-parser"     "${src}/ghc-parser"     {};
+      ipython-kernel    = self.callCabal2nix "ipython-kernel" "${src}/ipython-kernel" {};
+    } // displays self;
   };
   ihaskell = haskellPackages.ihaskell;
   ihaskellEnv = haskellPackages.ghcWithPackages (self: with self; [
     ihaskell
+    ihaskell-aeson
     ihaskell-blaze
+    ihaskell-charts
     ihaskell-diagrams
+    ihaskell-gnuplot
+    ihaskell-hatex
+    ihaskell-juicypixels
+    ihaskell-magic
+    ihaskell-plot
+    # ihaskell-rlangqq
+    ihaskell-static-canvas
+    # ihaskell-widgets
   ] ++ packages self);
   jupyter = pkgs.python3.buildEnv.override {
     extraLibs = with pkgs.python3Packages; [ ipython ipykernel jupyter_client notebook ];
