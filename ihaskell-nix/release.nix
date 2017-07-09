@@ -1,3 +1,5 @@
+{ packages ? (_: []) }:
+
 let
   pkgs = import <nixpkgs> {};
   src = pkgs.fetchFromGitHub {
@@ -22,7 +24,7 @@ let
     ihaskell
     ihaskell-blaze
     ihaskell-diagrams
-  ]);
+  ] ++ packages self);
   jupyter = pkgs.python3.buildEnv.override {
     extraLibs = with pkgs.python3Packages; [ ipython ipykernel jupyter_client notebook ];
   };
