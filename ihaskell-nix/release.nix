@@ -34,7 +34,6 @@ let
     export PATH="${pkgs.stdenv.lib.makeBinPath [ ihaskell ihaskellEnv jupyter ]}"
     ${ihaskell}/bin/ihaskell install -l $(${ihaskellEnv}/bin/ghc --print-libdir) && ${jupyter}/bin/jupyter notebook
   '';
-  profile = "${ihaskell.pname}-${ihaskell.version}/profile/profile.tar";
 in
 pkgs.buildEnv {
   name = "ihaskell-with-packages";
