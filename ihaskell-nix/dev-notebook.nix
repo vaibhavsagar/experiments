@@ -8,4 +8,6 @@ let
     ++ propagatedNativeBuildInputs
     ++ [ drv ]
     );
-in import ./release.nix { packages = (_: inputs); }
+  isHaskellPkg = p: (p ? pname) && (p ? version) && (p ? env);
+  haskellInputs = pkgs.stdenv.lib.filter isHaskellPkg inputs;
+in import ./release.nix { packages = (_: haskellInputs); }
