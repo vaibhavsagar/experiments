@@ -10,4 +10,4 @@ let
     );
   isHaskellPkg = p: (p ? pname) && (p ? version) && (p ? env);
   haskellInputs = pkgs.stdenv.lib.filter isHaskellPkg inputs;
-in import ./release.nix { packages = (_: haskellInputs); }
+in import ./default.nix { packages = (_: haskellInputs); }
