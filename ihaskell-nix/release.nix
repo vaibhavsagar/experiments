@@ -5,8 +5,8 @@ let
   src = pkgs.fetchFromGitHub {
     owner  = "gibiansky";
     repo   = "IHaskell";
-    rev    = "a184f94f67d87c800890c8ca23e552aa51ee2ec4";
-    sha256 = "0i3xkvj703da90bdhbfyyb2ihyny23mvkxay1jzxj2clj1a9d05r";
+    rev    = "9883dbd66652a4a3f8e009d3c64f36def4fde26d";
+    sha256 = "137zydddcr3pxxd24vnq5yifcnak9ahjc8wkb799pl5fhdpjzwvb";
   };
   dontCheck = pkgs.haskell.lib.dontCheck;
   displays = self: builtins.listToAttrs (
