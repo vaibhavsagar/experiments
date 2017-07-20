@@ -1,4 +1,4 @@
-{ packages ? (_: []) }:
+{ packages ? (_: []), systemPackages ? (_: []) }:
 
 let
   pkgs = import <nixpkgs> {};
@@ -56,7 +56,7 @@ let
   ihaskellSh = pkgs.writeScriptBin "ihaskell-notebook" ''
     #! ${pkgs.stdenv.shell}
     export GHC_PACKAGE_PATH="$(echo ${ihaskellEnv}/lib/*/package.conf.d| tr ' ' ':'):$GHC_PACKAGE_PATH"
-    export PATH="${pkgs.stdenv.lib.makeBinPath [ ihaskell ihaskellEnv jupyter ]}"
+    export PATH="${pkgs.stdenv.lib.makeBinPath ([ ihaskell ihaskellEnv jupyter ] ++ systemPackages pkgs)}"
     ${ihaskell}/bin/ihaskell install -l $(${ihaskellEnv}/bin/ghc --print-libdir) && ${jupyter}/bin/jupyter notebook
   '';
 in
