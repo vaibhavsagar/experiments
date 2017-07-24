@@ -12,7 +12,11 @@ in import "${IHaskell}/release.nix" {
     byteable
     bytestring
     containers
+    directory
+    hspec
+    hspec-expectations
     filepath
+    process
     utf8-string
     zlib
   ];
