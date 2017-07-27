@@ -15,11 +15,16 @@ cabal-version:       >=1.10
 
 library
   build-depends:       base >= 4.7 && < 5
-                     , bytestring
-                     , attoparsec
-                     , here
-                     , zlib
                      , SHA
+                     , attoparsec
+                     , base16-bytestring
+                     , byteable
+                     , bytestring
+                     , containers
+                     , directory
+                     , filepath
+                     , utf8-string
+                     , zlib
   default-language:    Haskell2010
 
 source-repository head
