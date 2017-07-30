@@ -1,8 +1,8 @@
 let IHaskell = (import <nixpkgs> {}).fetchFromGitHub {
     owner  = "gibiansky";
     repo   = "IHaskell";
-    rev    = "b1a13244228ac209d85c8d113fc73a2e616fd202";
-    sha256 = "12jk24pnhf2cjljp5z3f1ziv8ykaz7p3cnm1jfn6g7lnb33iifbl";
+    rev    = "f39b812fdcc5566210f9960f8218c5fc7fd40a77";
+    sha256 = "1hz9rsgv3y4cmmlc7655m96jad953d6fv6cqvp8yjdv3sj7szjza";
   };
 in import "${IHaskell}/release.nix" {
   packages = self: with self; [
@@ -19,6 +19,7 @@ in import "${IHaskell}/release.nix" {
   ];
   systemPackages = pkgs: with pkgs; [
     coreutils
+    findutils
     git
     qpdf
   ];
