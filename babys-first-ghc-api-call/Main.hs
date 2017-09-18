@@ -1,5 +1,3 @@
-import Data.Function (on)
-import Data.List (nubBy)
 import DynFlags
 import GHC
 import GHC.Paths
@@ -18,10 +16,7 @@ main = defaultErrorHandler defaultFatalMessager defaultFlushOut $
         setSessionDynFlags $ dflags { hscTarget = HscAsm
                                     -- , ghcLink   = LinkInMemory
                                     }
-        getTargets
-        target <- guessTarget "Test.hs" Nothing
-        addTarget target
-        getTargets >>= return . nubBy ((==) `on` targetId) >>= setTargets
+        setTargets =<< sequence [guessTarget "Test.hs" Nothing]
         load LoadAllTargets
         -- Bringing the module into the context
         importDecl <- IIDecl <$> parseImportDecl "import Prelude"
