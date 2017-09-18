@@ -24,11 +24,10 @@ main = defaultErrorHandler defaultFatalMessager defaultFlushOut $
         getTargets >>= return . nubBy ((==) `on` targetId) >>= setTargets
         load LoadAllTargets
         -- Bringing the module into the context
-        importDecl <- parseImportDecl "import Prelude"
-        let implicit = IIDecl $ importDecl {ideclImplicit = True}
+        importDecl <- IIDecl <$> parseImportDecl "import Prelude"
         setContext
-            $ (IIDecl . simpleImportDecl $ mkModuleName "Test") : [implicit]
+            $ (IIDecl . simpleImportDecl $ mkModuleName "Test") : [importDecl]
         -- evaluating and running an action
         setSessionDynFlags dflags
-        act <- unsafeCoerce <$> compileExpr "print test"
+        act <- unsafeCoerce <$> compileExpr "Prelude.print test"
         liftIO act
