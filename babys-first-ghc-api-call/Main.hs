@@ -13,7 +13,7 @@ main = defaultErrorHandler defaultFatalMessager defaultFlushOut $
         -- If we want to make GHC interpret our code on the fly, we
         -- ought to set those two flags, otherwise we
         -- wouldn't be able to use 'setContext' below
-        setSessionDynFlags $ dflags { hscTarget = HscAsm
+        setSessionDynFlags $ flip gopt_set Opt_BuildDynamicToo dflags { hscTarget = HscAsm
                                     -- , ghcLink   = LinkInMemory
                                     }
         setTargets =<< sequence [guessTarget "Test.hs" Nothing]
