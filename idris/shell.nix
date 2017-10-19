@@ -2,7 +2,7 @@
 
 pkgs.runCommand "dummy" {
   buildInputs = with pkgs; [
-    haskellPackages.idris
+    idrisPackages.idris
     gcc
     gmp
   ];
