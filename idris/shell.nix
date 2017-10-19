@@ -2,7 +2,7 @@
 
 pkgs.runCommand "dummy" {
   buildInputs = with pkgs; [
-    idrisPackages.idris
+    (idrisPackages.with-packages (with idrisPackages; [ contrib prelude ]))
     gcc
     gmp
   ];
