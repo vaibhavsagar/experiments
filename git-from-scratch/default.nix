@@ -3,8 +3,8 @@ let
   IHaskell = fetch {
     owner  = "gibiansky";
     repo   = "IHaskell";
-    rev    = "95735f19e40e6fe9c26f65642019bf23b074e84a";
-    sha256 = "0zwvm40gbcbpqvdqilwc333dgam24p1hz60wnslk1awzbis554g1";
+    rev    = "32aea170c41b181e34e76b9d9eb391e540fed6e1";
+    sha256 = "17n24pxizifvsxyh4lc8jgr45csbmrz936qssj8i5l96yr2fqz4b";
   };
   pinned   = fetch {
     owner  = "NixOS";
@@ -13,7 +13,7 @@ let
     sha256 = "01bir37cxwi252977prxgd0nmlzybcs4x7w2an51jim6mvk7500s";
   };
 in import "${IHaskell}/release.nix" {
-  pkgs = import pinned {};
+  nixpkgs = import pinned {};
   packages = self: with self; [
     SHA
     attoparsec
