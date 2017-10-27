@@ -1,9 +1,0 @@
-#! /usr/bin/env nix-shell
-#! nix-shell -i bash
-#! nix-shell -p curl jq nix
-
-set -eufo pipefail
-
-REV=$(curl https://api.github.com/repos/gibiansky/IHaskell/branches/master | jq -r '.commit.sha')
-SHA256=$(nix-prefetch-url --unpack https://github.com/gibiansky/IHaskell/archive/$REV.tar.gz)
-jq -n '{owner: "gibiansky", repo: "IHaskell", rev: $rev, sha256: $sha256}' --arg rev $REV --arg sha256 $SHA256
