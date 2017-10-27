@@ -1,0 +1,9 @@
+#! /usr/bin/env nix-shell
+#! nix-shell -i bash
+#! nix-shell -p curl jq nix
+
+set -eufo pipefail
+
+REV=$(curl https://api.github.com/repos/NixOS/nixpkgs-channels/branches/nixos-17.09 | jq -r '.commit.sha')
+SHA256=$(nix-prefetch-url --unpack https://github.com/NixOS/nixpkgs-channels/archive/$REV.tar.gz)
+jq -n '{owner: "NixOS", repo: "nixpkgs-channels", rev: $rev, sha256: $sha256}' --arg rev $REV --arg sha256 $SHA256
