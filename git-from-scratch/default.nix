@@ -1,9 +1,9 @@
 let
   fetch    = (import <nixpkgs> {}).fetchFromGitHub;
-  # ./updater gibiansky IHaskell > ./ihaskell.json
-  IHaskell = fetch (builtins.fromJSON (builtins.readFile ./ihaskell.json));
-  # ./updater NixOS nixpkgs-channels nixos-17.09 > ./nixpkgs.json
-  pinned   = fetch (builtins.fromJSON (builtins.readFile ./nixpkgs.json));
+  # ./updater versions.json ihaskell
+  IHaskell = fetch (builtins.fromJSON (builtins.readFile ./versions.json)).ihaskell;
+  # ./updater versions.json nixpkgs nixos-17.09
+  pinned   = fetch (builtins.fromJSON (builtins.readFile ./versions.json)).nixpkgs;
 in import "${IHaskell}/release.nix" {
   nixpkgs = import pinned {};
   packages = self: with self; [
