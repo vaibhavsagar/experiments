@@ -15,12 +15,12 @@ let
       gtk2hs-buildtools = super.callHackage "gtk2hs-buildtools" "0.13.3.0" {};
       cairo             = nixpkgs.lib.overrideDerivation super.cairo (drv: {
         src = let
-          repo = (nixpkgs.fetchFromGitHub {
+          repo = nixpkgs.fetchFromGitHub {
             owner  = "gtk2hs";
             repo   = "gtk2hs";
             rev    = "f066503df2c6d8d57e06630615d2097741d09d39";
             sha256 = "1drqwz5ry8i9sv34kkywl5hj0p4yffbjgzb5fgpp4dzdgfxl0cqk";
-          });
+          };
         in "${repo}/cairo";
       });
     };
