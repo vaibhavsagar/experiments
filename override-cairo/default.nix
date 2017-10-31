@@ -7,7 +7,8 @@ let
       sha256 = "0n4703mbfdgwnmy5cbzahgg0vmqpin25aafcf30fyl49gbzyjr6g";
     };
   };
-  nixpkgs = import <nixpkgs> { overlays = [ overlay ]; };
+in {nixpkgs ? import <nixpkgs> { overlays = [ overlay ]; }}:
+let
   lib = nixpkgs.haskell.lib;
   haskellPackages = nixpkgs.haskell.packages.ghc821.override {
     overrides = self: super: {
