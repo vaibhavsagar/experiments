@@ -6,9 +6,9 @@ let
 
   f = { mkDerivation, base, scotty, stdenv }:
       mkDerivation {
-        pname = "deploy";
+        pname = "blank-me-up";
         version = "0.1.0.0";
-        src = ./.;
+        src = ../blank-me-up;
         isLibrary = false;
         isExecutable = true;
         executableHaskellDepends = [ base scotty ];
