@@ -95,6 +95,7 @@ let
     contents = fullEnvironment;
     runAsRoot = ''
       mkdir -p /notebooks
+      mkdir -p /tmp
     '';
     config = {
       Cmd = [ "/bin/ihaskell-notebook" ];
@@ -108,6 +109,7 @@ let
       WorkingDir = "/notebooks";
       Volumes = {
         "/notebooks" = {};
+        "/tmp" = {};
       };
     };
   };
