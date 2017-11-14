@@ -15,11 +15,6 @@ let
     (type == "directory" && (elem baseName [ ".stack-work" "dist"])) ||
     any (lib.flip lib.hasSuffix baseName) [ ".hi" ".ipynb" ".nix" ".sock" ".yaml" ".yml" ]
   );
-  # ihaskellSourceFilter = src: name: type: let
-  #   relPath = lib.removePrefix (toString src + "/") (toString name);
-  # in cleanSource name type && ( any (lib.flip lib.hasPrefix relPath) [
-  #   "src" "main" "html" "Setup.hs" "ihaskell.cabal" "LICENSE"
-  # ]);
   ihaskell-src         = src;
   ipython-kernel-src   = "${src}/ipython-kernel";
   ghc-parser-src       = "${src}/ghc-parser";
