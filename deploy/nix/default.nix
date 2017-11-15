@@ -8,7 +8,7 @@ let
       mkDerivation {
         pname = "blank-me-up";
         version = "0.1.0.0";
-        src = ../blank-me-up;
+        src = ../app;
         isLibrary = false;
         isExecutable = true;
         executableHaskellDepends = [ base scotty ];
