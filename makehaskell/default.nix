@@ -1,8 +1,8 @@
-{ main ? "Main.hs", pkgs ? import <nixpkgs> {}, packages ? (_: []), name ? "main", src }:
-pkgs.runCommand name {} ''
-  ${pkgs.coreutils}/bin/mkdir -pv $out/bin
+{ main ? "Main.hs", nixpkgs ? import <nixpkgs> {}, packages ? (_: []), name ? "main", src }:
+nixpkgs.runCommand name {} ''
+  ${nixpkgs.coreutils}/bin/mkdir -pv $out/bin
   cd ${src}
-  ${pkgs.haskellPackages.ghcWithPackages packages}/bin/ghc ${main} \
-    -outputdir $(${pkgs.coreutils}/bin/mktemp -d) \
+  ${nixpkgs.haskellPackages.ghcWithPackages packages}/bin/ghc ${main} \
+    -outputdir $(${nixpkgs.coreutils}/bin/mktemp -d) \
     -o $out/bin/${name}
 ''
