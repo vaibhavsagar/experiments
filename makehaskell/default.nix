@@ -1,4 +1,4 @@
-{ main ? "Main.hs", nixpkgs ? import <nixpkgs> {}, packages ? (_: []), name ? "main", src }:
+{ main ? "Main.hs", name ? "main", nixpkgs ? import <nixpkgs> {}, packages ? (_: []), src }:
 nixpkgs.runCommand name {} ''
   ${nixpkgs.coreutils}/bin/mkdir -pv $out/bin
   cd ${src}
