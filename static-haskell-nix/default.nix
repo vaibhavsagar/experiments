@@ -1,12 +1,34 @@
+{ nixpkgs ? import <nixpkgs> {}, compiler ? "default" }:
+
 let
-  pkgs = import <nixpkgs> {};
-in pkgs.buildFHSUserEnv {
-  name = "fhs";
-  targetPkgs = pkgs: [
-    (pkgs.haskellPackages.ghcWithPackages (p: with p; [ cabal-install ]))
-    pkgs.gmp5.static
-    pkgs.glibc.static
-    pkgs.zlib.static
-    pkgs.zlib.dev
-  ];
-}
+
+  inherit (nixpkgs) pkgs;
+
+  f = { mkDerivation, base, scotty, stdenv }:
+      mkDerivation {
+        pname = "blank-me-up";
+        version = "0.1.0.0";
+        src = ./.;
+        isLibrary = false;
+        isExecutable = true;
+        enableSharedExecutables = false;
+        executableHaskellDepends = [ base scotty ];
+        license = stdenv.lib.licenses.bsd3;
+        configureFlags = [
+          "--ghc-option=-optl=-static"
+          "--ghc-option=-optl=-pthread"
+          "--ghc-option=-optl=-L${pkgs.gmp5.static}/lib"
+          "--ghc-option=-optl=-L${pkgs.zlib.static}/lib"
+          "--ghc-option=-optl=-L${pkgs.glibc.static}/lib"
+        ];
+      };
+
+  haskellPackages = if compiler == "default"
+                       then pkgs.haskellPackages
+                       else pkgs.haskell.packages.${compiler};
+
+  drv = haskellPackages.callPackage f {};
+
+in
+
+  if pkgs.lib.inNixShell then drv.env else drv
