@@ -16,10 +16,14 @@ let
               binary = lib.dontCheck self.binary_0_8_5_1;
               cheapskate = self.cheapskate_0_1_1;
               idris = lib.overrideCabal (self.callHackage "idris" "1.2.0" {}) (drv: {
-                doCheck = false; # I don't want to install Node :(
+                doCheck = false; # regression tests fail
                 librarySystemDepends = (drv.librarySystemDepends or []) ++ [pkgs.gmp];
+                testSystemDepends = (drv.testSystemDepends or []) ++ [pkgs.nodejs];
                 preBuild = ''
                   export LD_LIBRARY_PATH="$PWD/dist/build:$LD_LIBRARY_PATH"
+                '';
+                preCheck = ''
+                  export PATH="$PWD/dist/build/idris:$PATH"
                 '';
               });
               megaparsec = lib.doJailbreak (self.callHackage "megaparsec" "6.3.0" {});
