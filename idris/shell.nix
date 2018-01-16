@@ -1,11 +1,9 @@
 let
   inherit (import <nixpkgs> {}) fetchFromGitHub lib;
   overlay = self: super: {
-    all-cabal-hashes = super.fetchFromGitHub {
-      owner = "commercialhaskell";
-      repo  = "all-cabal-hashes";
-      rev    = "8ed17011c07ce97b5b5ed5a7481f20043d0d00cd";
-      sha256 = "0dmmv1qfsk0lx0cgi7bq4v12zdqm8ylxkhqnfqjz45wpwza2bm45";
+    all-cabal-hashes = super.fetchurl {
+      url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/8ed17011c07ce97b5b5ed5a7481f20043d0d00cd.tar.gz";
+      sha256 = "007s07vyl4mnvy8nspccdinqzvs0gv41sgcwds1a763dkgcnakp2";
     };
     idrisPackages = super.callPackage <nixpkgs/pkgs/development/idris-modules> {
       idris =
@@ -16,19 +14,13 @@ let
               binary = lib.dontCheck self.binary_0_8_5_1;
               cheapskate = self.cheapskate_0_1_1;
               idris = lib.overrideCabal (self.callHackage "idris" "1.2.0" {}) (drv: {
-                doCheck = false; # regression tests fail
+                doCheck = false;
                 librarySystemDepends = (drv.librarySystemDepends or []) ++ [pkgs.gmp];
-                testSystemDepends = (drv.testSystemDepends or []) ++ [pkgs.nodejs];
                 preBuild = ''
                   export LD_LIBRARY_PATH="$PWD/dist/build:$LD_LIBRARY_PATH"
                 '';
-                preCheck = ''
-                  export PATH="$PWD/dist/build/idris:$PATH"
-                '';
               });
-              megaparsec = lib.doJailbreak (self.callHackage "megaparsec" "6.3.0" {});
-              parsers = lib.dontCheck super.parsers;
-              semigroupoids = lib.dontCheck super.semigroupoids;
+              megaparsec = self.callHackage "megaparsec" "6.3.0" {};
             };
           };
         in
