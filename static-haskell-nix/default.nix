@@ -15,8 +15,8 @@ let
         executableHaskellDepends = [ base scotty ];
         license = stdenv.lib.licenses.bsd3;
         configureFlags = [
+          "--disable-shared"
           "--ghc-option=-optl=-static"
-          "--ghc-option=-optl=-pthread"
           "--ghc-option=-optl=-L${pkgs.gmp5.static}/lib"
           "--ghc-option=-optl=-L${pkgs.zlib.static}/lib"
           "--ghc-option=-optl=-L${pkgs.glibc.static}/lib"
