@@ -22,16 +22,26 @@ data Last : List a -> a -> Type where
   LastOne : Last [value] value
   LastCons : (prf : Last xs value) -> Last (x :: xs) value
 
-notLastInNil : Last [] value -> Void
+Uninhabited (Last [] value) where
+  uninhabited x impossible
+
+total notLastInNil : Last [] value -> Void
 notLastInNil LastOne impossible
 notLastInNil (LastCons _) impossible
 
-notIsLast : (notLast : (value = x) -> Void) -> Dec (Last [x] value)
-notIsLast notLast = ?hole_rhs
+total notIsLast : (notLast : (x = value) -> Void) -> Last [x] value -> Void
+notIsLast notLast LastOne = notLast Refl
+notIsLast notLast (LastCons prf) = (notLastInNil prf)
 
-isLast : DecEq a => (xs : List a) -> (value : a) -> Dec (Last xs value)
+total notLast : {xs : List a} -> (contra : Last xs value -> Void) -> Last (x :: xs) value -> Void
+notLast {xs = []} contra LastOne = ?hole
+notLast {xs = xs} contra (LastCons prf) = contra prf
+
+total isLast : DecEq a => (xs : List a) -> (value : a) -> Dec (Last xs value)
 isLast [] value = No notLastInNil
-isLast [x] value = case decEq value x of
+isLast [x] value = case decEq x value of
                         (Yes Refl) => Yes LastOne
-                        (No notLast) => notIsLast notLast
-isLast (x :: xs) value = ?isLast_rhs_2
+                        (No notLast) => No (notIsLast notLast)
+isLast (x :: xs) value = case isLast xs value of
+                              (Yes prf) => Yes (LastCons prf)
+                              (No contra) => No (notLast contra)
