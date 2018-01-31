@@ -1,11 +1,11 @@
 let
   inherit (import <nixpkgs> {}) fetchFromGitHub lib;
   overlay = self: super: {
-    all-cabal-hashes = super.fetchurl {
+    all-cabal-hashes = self.fetchurl {
       url = "https://github.com/commercialhaskell/all-cabal-hashes/archive/8ed17011c07ce97b5b5ed5a7481f20043d0d00cd.tar.gz";
       sha256 = "007s07vyl4mnvy8nspccdinqzvs0gv41sgcwds1a763dkgcnakp2";
     };
-    idrisPackages = super.callPackage <nixpkgs/pkgs/development/idris-modules> {
+    idrisPackages = self.callPackage <nixpkgs/pkgs/development/idris-modules> {
       idris =
         let
           inherit (super.haskell) lib;
