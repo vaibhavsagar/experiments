@@ -6,6 +6,7 @@ module Main (main) where
 
 import           Data.Acid
 import           Data.Acid.Remote
+import           Data.Acid.Local (createCheckpointAndClose)
 
 import           Control.Applicative
 import           Control.Monad.Reader
@@ -73,7 +74,7 @@ instance Migrate KeyValue where
 
 main :: IO ()
 main = do args <- getArgs
-          acid <- openLocalState (KeyValue Map.empty)
+          acid <- openLocalStateFrom "state/KeyValue" (KeyValue Map.empty)
           case args of
             [key]
               -> do mbKey <- query acid (LookupKey (fromString key))
@@ -86,4 +87,4 @@ main = do args <- getArgs
             _ -> do putStrLn "Usage:"
                     putStrLn "  key               Lookup the value of 'key'."
                     putStrLn "  key value         Set the value of 'key' to 'value'."
-          closeAcidState acid
+          createCheckpointAndClose acid
