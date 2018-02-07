@@ -15,4 +15,4 @@ let
     }) {};
   });
 in
-  haskellPackages.ghcWithPackages (p: [ p.haskell-src-exts ])
+  haskellPackages.ghcWithPackages (p: [ p.hlint ])
