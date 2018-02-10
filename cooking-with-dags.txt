@@ -1,5 +1,5 @@
 Talk title:
-Now you're cooking with DAGs! An introduction to Tarjan's Strongly Connected Components algorithm!!
+Now you're cooking with DAGs: an introduction to Tarjan's Strongly Connected Components algorithm!!
 
 Abstract for your talk:
 What do Git, build tools, and the Boolean satisfiability problem have in common?
