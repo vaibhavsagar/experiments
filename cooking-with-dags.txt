@@ -25,4 +25,4 @@ Timeline for your talk:
   - Any possibly-DAG you have to process!
 
 Intended audience:
-Anyone who likes algorithm visualisations and/or graphs!
+Anyone who has ever had to tame unruly vertices and edges!
