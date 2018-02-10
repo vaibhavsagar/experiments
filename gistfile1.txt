@@ -1,7 +1,28 @@
 Talk title:
+Now you're cooking with DAGs! An introduction to Tarjan's Strongly Connected Components algorithm!!
 
 Abstract for your talk:
+What do Git, build tools, and the Boolean satisfiability problem have in common?
 
 Timeline for your talk:
+2 min: Drawing a Git repo
+  - Git commits form a directed acyclic graph, because hashes
+  - Git commits can't have any cycles, so check for those
+  - Helpful error messages: Point out where the cycle is
+  - Git hashes include hashes of parents, so hash parents and then children
+2 min: Finding Tarjan's SCC algorithm
+  - StackOverflow -> Wikipedia
+  - What's a strongly connected component?
+  - What's a topological sort? Why do we want a reverse topological sort?
+  - SCCs and reverse topological sorting in linear time!
+  - Knuth's favourite!
+3 min: It works!
+  - Walk through the counterexample from the Wikipedia page
+  - Walk through a DAG
+3 min: Other applications
+  - Build tools/data flow systems
+  - Boolean satisfiability (2SAT)
+  - Any possibly-DAG you have to process!
 
 Intended audience:
+Anyone who likes algorithm visualisations and/or graphs!
