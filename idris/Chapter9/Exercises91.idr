@@ -33,15 +33,14 @@ total notIsLast : (notLast : (x = value) -> Void) -> Last [x] value -> Void
 notIsLast notLast LastOne = notLast Refl
 notIsLast notLast (LastCons prf) = (notLastInNil prf)
 
-total notLast : {xs : List a} -> (contra : Last xs value -> Void) -> Last (x :: xs) value -> Void
-notLast {xs = []} contra LastOne = ?hole
-notLast {xs = xs} contra (LastCons prf) = contra prf
+total notLast : (contra : Last (x :: xs) value -> Void) -> Last (_ :: x :: xs) value -> Void
+notLast contra (LastCons prf) = contra prf
 
 total isLast : DecEq a => (xs : List a) -> (value : a) -> Dec (Last xs value)
 isLast [] value = No notLastInNil
 isLast [x] value = case decEq x value of
                         (Yes Refl) => Yes LastOne
                         (No notLast) => No (notIsLast notLast)
-isLast (x :: xs) value = case isLast xs value of
+isLast (x :: y :: xs) value = case isLast (y :: xs) value of
                               (Yes prf) => Yes (LastCons prf)
                               (No contra) => No (notLast contra)
