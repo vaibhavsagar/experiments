@@ -1,7 +1,29 @@
 Talk title:
+Testing is boring, let's mine Bitcoin! (Ab)using CI for fun and profit!
 
 Abstract for your talk:
+CI is inextricably linked with testing, but testing is boring! We can do so
+much more than that that it's worth exploring those possibilities. Perhaps you
+will be inspired to apply CI to your next problem!
 
 Timeline for your talk:
+1 min: Intro
+  - Testing is the least interesting application of CI
+  - We can do so much more!
+  - It's free!
+3 min: Building my resume with Travis
+  - Pandoc
+  - LaTeX
+  - Building an artifact!
+  - Travis can do Git commits!
+2 min: Building my website
+  - Hakyll = Pandoc + HTML
+  - Janky CMS
+1 min: Building my presentations
+  - More Pandoc
+1 min: Travis-driven development
+1 min: Mining Bitcoin (don't do this!)
+1 min: Cron!
 
 Intended audience:
+  - Anyone excited about automating things for free!
