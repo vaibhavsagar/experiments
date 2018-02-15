@@ -2,7 +2,13 @@ Talk title:
 Now you're cooking with DAGs: an introduction to Tarjan's Strongly Connected Components algorithm!!
 
 Abstract for your talk:
-What do Git, build tools, and the Boolean satisfiability problem have in common?
+What do Git, build tools, and the Boolean satisfiability problem have in
+common? How do you tell if a graph is acyclic? What the heck is a strongly
+connected component and who cares???
+
+In this talk I'll talk about a hammer large enough to answer all these
+questions and hopefully convince you that it is a worthy addition to your
+toolbox!
 
 Timeline for your talk:
 2 min: Drawing a Git repo
