@@ -12,17 +12,22 @@ toolbox!
 
 Timeline for your talk:
 2 min: Drawing a Git repo
-  - Git commits form a directed acyclic graph, because hashes
+  - Suppose I wanted to draw a git repo as a bunch of commits (nodes) with
+    links to each other. How would this work?
+  - Git commits need to form a directed acyclic graph, enforced by hashes
   - Git commits can't have any cycles, so check for those
-  - Helpful error messages: Point out where the cycle is
-  - Git hashes include hashes of parents, so hash parents and then children
+  - I want helpful error messages, so I need to point out where any cycles are
+    -> SCCs
+  - Git hashes include hashes of parents, so hash parents before children
+    -> reverse topological sort
 2 min: Finding Tarjan's SCC algorithm
-  - StackOverflow -> Wikipedia
-  - What's a strongly connected component?
+  - Ask on StackOverflow -> Look up algorithm on Wikipedia
+  - What's a strongly connected component? any subgraph where each node
+    connects to every other -> cycles!
   - What's a topological sort? Why do we want a reverse topological sort?
+    Because we have children -> parents instead of parents -> children
   - SCCs and reverse topological sorting in linear time!
-  - Knuth's favourite!
-3 min: It works!
+3 min: Seeing it in action
   - Walk through the counterexample from the Wikipedia page
   - Walk through a DAG
 3 min: Other applications
