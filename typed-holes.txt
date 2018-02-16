@@ -8,35 +8,38 @@ is possible to change this dysfunctional relationship and move past this stage
 towards having a conversation with their programming language.
 
 Timeline for your talk:
-1 min: Intro
+1 min: Setting up a running example
   - I want to write a simple program
   - Given a function and a list, apply the function to each element in the list
-    and give me back the result
+    and give me back the result (aka map)
 2 min: Python
   - List comprehensions
   - Is this right? What does that even mean?
+  - So easy to get it wrong: `def map(f, ls): None`, `def map(f, ls): 1`
   - Tests
-  - Nonsensical implementation
-  - Python is laissez-faire, doesn't care
+  - Python is laissez-faire, doesn't care as long as it's syntactically correct
   - Confidence that I did the right thing: low
 3 min: Haskell
-  - Intro to Haskell syntax
-  - Our first signature
+  - Our first type signature
   - I don't know what the implementation should be, let me put a `_` here
   - GHC tells me what to do!
   - Fill in the holes
-  - It works!
-  - We still need tests though, demonstrate `map = []` and other nonsense
-  - Haskell isn't good enough
+  - It works (if I do the right thing with case statements etc.)!
+  - We still need tests though, demonstrate `map = []` and other nonsense, such
+    as `map f (x:xs) = f x : map f xs` (doesn't handle [])
+  - Haskell isn't good enough, can we do better?
   - Confidence that I did the right thing: medium
 3 min: Idris
-  - Intro to Idris syntax
-  - Vectors are length-indexed lists
+  - Idris is essentially Haskell with `:` and `::` switched
+  - Vectors are length-indexed lists, because we want to keep track of length
   - I don't know what the implementation should be, let me put a `?hole` here
   - Demonstrate Idris' editor integration, case splitting
   - Much easier!
+  - Theoretically possible to do the wrong thing, but incredibly difficult
   - Confidence that I did the right thing: high
 ~1 min: Conclusion
+  - Typed holes change the relationship between programmer and language, from
+    one-sided gatekeepers to collaborators/partners in crime.
   - Try typed holes! Available in Haskell, PureScript, Agda, and Idris
 
 Intended audience:
