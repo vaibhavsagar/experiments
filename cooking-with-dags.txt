@@ -1,14 +1,16 @@
 Talk title:
-Now you're cooking with DAGs: an introduction to Tarjan's Strongly Connected Components algorithm!!
+Tarjan's Strongly Connected Components Algorithm: Now You're Cooking with DAGs!
 
 Abstract for your talk:
-What do Git, build tools, and the Boolean satisfiability problem have in
-common? How do you tell if a graph is acyclic? What the heck is a strongly
-connected component and who cares???
 
-In this talk I'll talk about a hammer large enough to answer all these
-questions and hopefully convince you that it is a worthy addition to your
-toolbox!
+Tarjan's Strongly Connected Components algorithm is my favourite, and one of
+Knuth's too! In one fell swoop, it cleaves graphs into smaller parts for
+processing and puts these parts in the most convenient order. Most
+intriguingly, it manages to do all this in linear time!
+
+In this talk, I'll talk about how this algorithm works and when you might want
+to use it, as well as demonstrate by thwacking problems with Git, build tools,
+and boolean satisfiability into submission.
 
 Timeline for your talk:
 2 min: Drawing a Git repo
