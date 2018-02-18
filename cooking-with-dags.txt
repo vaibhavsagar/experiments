@@ -13,7 +13,7 @@ to use it, as well as demonstrate by thwacking problems with Git, build tools,
 and boolean satisfiability into submission.
 
 Timeline for your talk:
-2 min: Drawing a Git repo
+2 min: Drawing a Git repo (demonstrating the need for such an algorithm)
   - Suppose I wanted to draw a git repo as a bunch of commits (nodes) with
     links to each other. How would this work?
   - Git commits need to form a directed acyclic graph, enforced by hashes
@@ -22,19 +22,23 @@ Timeline for your talk:
     -> SCCs
   - Git hashes include hashes of parents, so hash parents before children
     -> reverse topological sort
-2 min: Finding Tarjan's SCC algorithm
-  - Ask on StackOverflow -> Look up algorithm on Wikipedia
-  - What's a strongly connected component? any subgraph where each node
-    connects to every other -> cycles!
+3 min: Finding Tarjan's SCC algorithm
+  - Asking "how to check if a directed graph is acyclic" on StackOverflow ->
+    topological sorting -> Tarjan's SCCs algorithm -> Look it up on Wikipedia
+    and copy the pseudocode
   - What's a topological sort? Why do we want a reverse topological sort?
     Because we have children -> parents instead of parents -> children
+  - What's a strongly connected component? any subgraph where each node
+    connects to every other -> cycles!
   - SCCs and reverse topological sorting in linear time!
 3 min: Seeing it in action
-  - Walk through the counterexample from the Wikipedia page
+  - Walk through a not-a-DAG from the Wikipedia page on the algorithm
   - Walk through a DAG
-3 min: Other applications
-  - Build tools/data flow systems
-  - Boolean satisfiability (2SAT)
+2 min: Other applications
+  - Build tools/data flow systems -> pull dependencies in the order they're
+    needed and check for cyclic dependencies
+  - Boolean satisfiability (2SAT) -> encode formula as a directed graph and
+    make sure that A and !A aren't in the same SCC
   - Any possibly-DAG you have to process!
 
 Intended audience:
