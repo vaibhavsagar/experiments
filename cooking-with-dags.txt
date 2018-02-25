@@ -44,4 +44,4 @@ Timeline for your talk:
   - Any possibly-DAG you have to process!
 
 Intended audience:
-Anyone who has ever had to tame unruly vertices and edges!
+Anyone who has ever had to tame unruly vertices and edges! Basic graph theory: vertices, edges, depth-first search.
