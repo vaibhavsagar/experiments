@@ -30,8 +30,8 @@ let
   pkgs = import versions.nixpkgs { overlays = [ overlay ]; };
 in
 pkgs.runCommand "dummy" {
-  buildInputs = with pkgs; [
-    (with idrisPackages; with-packages [ contrib ])
+  buildInputs = with pkgs; with idrisPackages; [
+    (with-packages [ contrib ])
     gcc
     gmp
   ];
