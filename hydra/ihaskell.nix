@@ -15,7 +15,7 @@ let pkgs = import <nixpkgs> {}; in {
       # ihaskell-widgets
     ];
   };
-  build-8_2 = pkgs.callPackage <ihaskellSrc/release-8.2.nix> {
+  build-8_2 = pkgs.callpackage <ihaskellsrc/release-8.2.nix> {
     packages = self: with self; [
       ihaskell-aeson
       ihaskell-blaze
@@ -29,6 +29,10 @@ let pkgs = import <nixpkgs> {}; in {
       # ihaskell-rlangqq
       ihaskell-static-canvas
       # ihaskell-widgets
+    ];
+  };
+  build-8_4 = pkgs.callpackage <ihaskellsrc/release-8.4.nix> {
+    packages = self: with self; [
     ];
   };
 }
