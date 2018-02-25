@@ -4,43 +4,44 @@ Moving towards dialogue: talking to your computer with typed holes!
 Abstract for your talk:
 With most people, their first (and only) experience of static types is being
 continually told off by their compiler. With a little gentle encouragement, it
-is possible to change this dysfunctional relationship and move past this stage
+is possible to mend this dysfunctional relationship and move past this stage
 towards having a conversation with their programming language.
 
 Timeline for your talk:
-1 min: Setting up a running example
-  - I want to write a simple program
+3 min: Let's write a simple program in Python!
   - Given a function and a list, apply the function to each element in the list
     and give me back the result (aka map)
-2 min: Python
-  - List comprehensions
-  - Is this right? What does that even mean?
-  - So easy to get it wrong: `def map(f, ls): None`, `def map(f, ls): 1`
-  - Tests
+  - I could use list comprehensions, for loops, etc.
+  - Is this the right solution, or at least *a* right solution? What does it
+    mean for a solution to be right?
+  - So easy to get it wrong in Python: `def map(f, ls): None`, `def map(f, ls): 1`
   - Python is laissez-faire, doesn't care as long as it's syntactically correct
+  - We need tests to make sure the program does what we want it to do.
   - Confidence that I did the right thing: low
 3 min: Haskell
   - Our first type signature
   - I don't know what the implementation should be, let me put a `_` here
-  - GHC tells me what to do!
+  - Coming from Python-land, seeing an error message like this can be scary!
+  - Let's actually read this though: GHC is telling me what to do!
   - Fill in the holes
   - It works (if I do the right thing with case statements etc.)!
   - We still need tests though, demonstrate `map = []` and other nonsense, such
     as `map f (x:xs) = f x : map f xs` (doesn't handle [])
-  - Haskell isn't good enough, can we do better?
   - Confidence that I did the right thing: medium
+  - Haskell isn't good enough, can we do better?
 3 min: Idris
-  - Idris is essentially Haskell with `:` and `::` switched
-  - Vectors are length-indexed lists, because we want to keep track of length
+  - Introduce Vectors (length-indexed lists), because we want to keep track of length
   - I don't know what the implementation should be, let me put a `?hole` here
   - Demonstrate Idris' editor integration, case splitting
   - Much easier!
+  - Idris can proof search, i.e. fill in the definition by itself!
   - Theoretically possible to do the wrong thing, but incredibly difficult
   - Confidence that I did the right thing: high
 ~1 min: Conclusion
   - Typed holes change the relationship between programmer and language, from
     one-sided gatekeepers to collaborators/partners in crime.
-  - Try typed holes! Available in Haskell, PureScript, Agda, and Idris
+  - Mention program sketching: using a SAT solver to complete a partially
+    specified program. Coming to a language near you!
 
 Intended audience:
-Anyone who hasn't heard of typed holes!
+Anyone who hasn't heard of typed holes! Minimal background assumed.
