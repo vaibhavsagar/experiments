@@ -1,5 +1,5 @@
 Talk title:
-Tarjan's Strongly Connected Components Algorithm: Now You're Cooking with DAGs!
+Tarjan's Algorithm: Now You're Cooking with DAGs!
 
 Abstract for your talk:
 
@@ -9,36 +9,38 @@ processing and puts these parts in the most convenient order. Most
 intriguingly, it manages to do all this in linear time!
 
 In this talk, I'll talk about how this algorithm works and when you might want
-to use it, as well as demonstrate by thwacking problems with Git, build tools,
-and boolean satisfiability into submission.
+to use it, as well as demonstrate its utility by thwacking problems with Git,
+build tools, and boolean satisfiability into submission.
 
 Timeline for your talk:
-2 min: Drawing a Git repo (demonstrating the need for such an algorithm)
+2 min: Let's draw a Git repo! (demonstrating the need for such an algorithm)
   - Suppose I wanted to draw a git repo as a bunch of commits (nodes) with
     links to each other. How would this work?
-  - Git commits need to form a directed acyclic graph, enforced by hashes
-  - Git commits can't have any cycles, so check for those
+  - Git commits need to form a directed acyclic graph, so check for cycles
   - I want helpful error messages, so I need to point out where any cycles are
     -> SCCs
   - Git hashes include hashes of parents, so hash parents before children
     -> reverse topological sort
-3 min: Finding Tarjan's SCC algorithm
+3 min: Finding Tarjan's SCCs algorithm
   - Asking "how to check if a directed graph is acyclic" on StackOverflow ->
-    topological sorting -> Tarjan's SCCs algorithm -> Look it up on Wikipedia
+    topological sorting -> Tarjan's SCCs algorithm -> Looking it up on Wikipedia
     and copy the pseudocode
   - What's a topological sort? Why do we want a reverse topological sort?
     Because we have children -> parents instead of parents -> children
-  - What's a strongly connected component? any subgraph where each node
-    connects to every other -> cycles!
+  - What's a strongly connected component? any subgraph where there is a path
+    to/from each node -> cycles!
   - SCCs and reverse topological sorting in linear time!
 3 min: Seeing it in action
-  - Walk through a not-a-DAG from the Wikipedia page on the algorithm
-  - Walk through a DAG
+  - Walk through the not-a-DAG from the Wikipedia page on the algorithm
+    (https://en.wikipedia.org/wiki/Tarjan%27s_strongly_connected_components_algorithm#/media/File:Tarjan%27s_Algorithm_Animation.gif)
+    using the same graph but my own visualisation.
+  - Walk through a valid DAG
 2 min: Other applications
   - Build tools/data flow systems -> pull dependencies in the order they're
-    needed and check for cyclic dependencies
-  - Boolean satisfiability (2SAT) -> encode formula as a directed graph and
-    make sure that A and !A aren't in the same SCC
+    needed and check/report for cyclic dependencies
+  - Boolean satisfiability (2SAT) -> encode formula as a directed graph, make
+    sure that A and !A aren't in the same SCC, and assign truth values in
+    reverse topologically sorted order!
   - Any possibly-DAG you have to process!
 
 Intended audience:
