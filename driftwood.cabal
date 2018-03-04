@@ -20,6 +20,7 @@ library
                      , aeson
                      , bytestring
                      , unordered-containers
+                     , fast-logger
   default-language:    Haskell2010
 
 executable driftwood
@@ -29,6 +30,7 @@ executable driftwood
   build-depends:       base
                      , driftwood
                      , bytestring
+                     , fast-logger
   default-language:    Haskell2010
 
 source-repository head
