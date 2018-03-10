@@ -14,20 +14,21 @@ computeDiscounts
     -> Map Int Discount
     -> Order Int
     -> Maybe [LineItem Discounted]
-computeDiscounts productDb discountDb (Order lineItems discountCode) =
-    case discountCode of
-        Nothing -> go Left
-        Just code -> case find (\d -> discountName d == code) (Map.elems discountDb) of
-            Nothing       -> computeDiscounts productDb discountDb (Order lineItems Nothing)
-            Just discount -> case discountType discount of
-                AllProducts    -> go (Right . applyDiscount discount)
-                ProductList ls -> let
-                    discounter item = if item `elem` ls
-                        then Right . applyDiscount discount <$> Map.lookup item productDb
-                        else Left                           <$> Map.lookup item productDb
-                    discountedItem (LineItem i p) = flip LineItem p <$> discounter i
-                    in sequenceA $ map discountedItem lineItems
-    where go fn = (fmap . fmap) fn <$> traverse (traverse (`Map.lookup` productDb)) lineItems
+computeDiscounts productDb discountDb (Order lineItems discountCode) = case discountCode of
+    Nothing -> go Left
+    Just code -> case findCode code of
+        Nothing       -> computeDiscounts productDb discountDb (Order lineItems Nothing)
+        Just discount -> case discountType discount of
+            AllProducts    -> go (Right . applyDiscount discount)
+            ProductList ls -> sequenceA $ map (discountedItem discount ls) lineItems
+    where
+        go fn = (fmap . fmap) fn <$> traverse (traverse (`Map.lookup` productDb)) lineItems
+        findCode code = find ((code ==) . discountName) (Map.elems discountDb)
+        discountedItem discount ls (LineItem i p) =
+            flip LineItem p <$> discounter discount ls i
+        discounter discount ls item = (if item `elem` ls
+            then Right . applyDiscount discount
+            else Left) <$> Map.lookup item productDb
 
 applyDiscount :: Discount -> Product -> DiscountedProduct
 applyDiscount discount@(Discount _ percent _) product@(Product _ price) =
