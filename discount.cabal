@@ -16,6 +16,7 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Discount
+                       Discount.Format
                        Discount.Types
   -- other-modules:
   -- other-extensions:
