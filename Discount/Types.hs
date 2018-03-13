@@ -39,3 +39,5 @@ data DiscountedProduct
     { originalProduct :: Product
     , newPrice        :: Int
     } deriving (Eq, Show)
+
+type Discounted = Either Product DiscountedProduct
