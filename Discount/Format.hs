@@ -1,6 +1,7 @@
 module Discount.Format (formatDiscountedCart) where
 
 import Data.Functor ((<$))
+import Data.List (intercalate)
 import Data.Monoid (mconcat)
 import Text.Printf (printf)
 
@@ -34,4 +35,4 @@ formatDiscountedCart :: [LineItem Discounted] -> String
 formatDiscountedCart lineItems = let
     formattedLineItems = map formatDiscountedLineItem lineItems
     orderTotal = "Total " ++ showPrice (calculateTotal lineItems)
-    in unlines $ ["Your cart:", ""] ++ formattedLineItems ++ ["---", orderTotal]
+    in intercalate "\n" $ ["Your cart:", ""] ++ formattedLineItems ++ ["---", orderTotal]

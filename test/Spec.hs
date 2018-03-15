@@ -67,8 +67,7 @@ main = do
                     $40.00 for 2 copies of "Black Jacobins"
                     $45.00 for 3 copies of "Freedom Is a Constant Struggle"
                     ---
-                    Total $85.00
-                    |]
+                    Total $85.00|]
                 formatDiscountedCart discounted `shouldBe` expected
             it "applies a 50% off discount to all items" $ do
                 let Right discounted = basicDiscount cart { orderDiscountCode = Just "WELCOME" }
@@ -78,8 +77,7 @@ main = do
                     $20.00 (Original Price $40.00) for 2 copies of "Black Jacobins"
                     $22.50 (Original Price $45.00) for 3 copies of "Freedom Is a Constant Struggle"
                     ---
-                    Total $42.50
-                    |]
+                    Total $42.50|]
                 formatDiscountedCart discounted `shouldBe` expected
             it "applies a 75% discount to only one item" $ do
                 let Right discounted = basicDiscount cart { orderDiscountCode = Just "JAC75" }
@@ -89,6 +87,5 @@ main = do
                     $10.00 (Original Price $40.00) for 2 copies of "Black Jacobins"
                     $45.00 for 3 copies of "Freedom Is a Constant Struggle"
                     ---
-                    Total $55.00
-                    |]
+                    Total $55.00|]
                 formatDiscountedCart discounted `shouldBe` expected
