@@ -34,5 +34,6 @@ test-suite discount-test
                      , containers
                      , discount
                      , hspec
+                     , interpolate
                      , transformers
   default-language:    Haskell2010
