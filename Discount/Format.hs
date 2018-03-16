@@ -3,6 +3,7 @@ module Discount.Format (formatDiscountedCart) where
 import Data.Functor ((<$))
 import Data.List (intercalate)
 import Data.Monoid (mconcat)
+import Numeric.Natural
 import Text.Printf (printf)
 
 import Discount.Types
@@ -12,7 +13,7 @@ showPrice price = let
     (dollars,cents) = divMod price 100
     in "$" ++ show dollars ++ "." ++ printf "%02d" cents
 
-pluraliseCopy :: Int -> String
+pluraliseCopy :: Natural -> String
 pluraliseCopy 1 = show 1 ++ " copy"
 pluraliseCopy n = show n ++ " copies"
 

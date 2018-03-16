@@ -5,6 +5,7 @@
 module Discount.Types (module Discount.Types) where
 
 import Data.Ratio ((%))
+import Numeric.Natural
 
 data Product
     = Product
@@ -15,7 +16,7 @@ data Product
 data LineItem a
     = LineItem
     { lineItem         :: a
-    , lineItemQuantity :: Int
+    , lineItemQuantity :: Natural
     } deriving (Eq, Show, Functor, Foldable, Traversable)
 
 data Order a
@@ -58,8 +59,8 @@ applyDiscount discount@(Discount _ percent _) product@(Product _ price) =
 
 calculateLineItemTotal :: LineItem Discounted -> Int
 calculateLineItemTotal (LineItem product quantity) = case product of
-    Left  (Product           _ price) -> price * quantity
-    Right (DiscountedProduct _ price) -> price * quantity
+    Left  (Product           _ price) -> price * fromIntegral quantity
+    Right (DiscountedProduct _ price) -> price * fromIntegral quantity
 
 calculateTotal :: [LineItem Discounted] -> Int
 calculateTotal = sum . map calculateLineItemTotal
