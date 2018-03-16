@@ -59,33 +59,43 @@ main = do
                 let discounted' = basicDiscount $ Order [LineItem 3 1] (Just "WELCOME")
                 discounted `shouldBe` Left "item 3 not found"
         describe "cart display" $ do
+            let displayCart' = displayCart productDatabase discountDatabase
             it "doesn't apply any discount when an invalid code is provided" $ do
-                let Right discounted = basicDiscount cart
-                let expected = unindent [i|
+                let expected = Right $ unindent [i|
                     Your cart:
 
                     $40.00 for 2 copies of "Black Jacobins"
                     $45.00 for 3 copies of "Freedom Is a Constant Struggle"
                     ---
                     Total $85.00|]
-                formatDiscountedCart discounted `shouldBe` expected
+                displayCart' cart `shouldBe` expected
             it "applies a 50% off discount to all items" $ do
-                let Right discounted = basicDiscount cart { orderDiscountCode = Just "WELCOME" }
-                let expected = unindent [i|
+                let cart' = cart { orderDiscountCode = Just "WELCOME" }
+                let expected = Right $ unindent [i|
                     Your cart:
 
                     $20.00 (Original Price $40.00) for 2 copies of "Black Jacobins"
                     $22.50 (Original Price $45.00) for 3 copies of "Freedom Is a Constant Struggle"
                     ---
                     Total $42.50|]
-                formatDiscountedCart discounted `shouldBe` expected
+                displayCart' cart' `shouldBe` expected
             it "applies a 75% discount to only one item" $ do
-                let Right discounted = basicDiscount cart { orderDiscountCode = Just "JAC75" }
-                let expected = unindent [i|
+                let cart' = cart { orderDiscountCode = Just "JAC75" }
+                let expected = Right $ unindent [i|
                     Your cart:
 
                     $10.00 (Original Price $40.00) for 2 copies of "Black Jacobins"
                     $45.00 for 3 copies of "Freedom Is a Constant Struggle"
                     ---
                     Total $55.00|]
-                formatDiscountedCart discounted `shouldBe` expected
+                displayCart' cart' `shouldBe` expected
+            it "displays correctly when only one copy is ordered" $ do
+                let cart = Order [LineItem 1 1, LineItem 2 1] Nothing
+                let expected = Right $ unindent [i|
+                    Your cart:
+
+                    $20.00 for 1 copy of "Black Jacobins"
+                    $15.00 for 1 copy of "Freedom Is a Constant Struggle"
+                    ---
+                    Total $35.00|]
+                displayCart' cart `shouldBe` expected

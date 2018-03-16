@@ -5,6 +5,7 @@ module Discount
     ) where
 
 import           Data.Bool              (bool)
+import           Data.Either
 import           Data.List              (find)
 import qualified Data.Map.Strict as Map
 import           Data.Map.Strict        (Map)
@@ -40,3 +41,12 @@ lookupError :: Ord k => (k -> l) -> Map k v -> k -> Either l v
 lookupError err table key = case Map.lookup key table of
     Just value -> Right value
     Nothing -> Left (err key)
+
+displayCart
+    :: Map Int Product
+    -> Map Int Discount
+    -> Order Int
+    -> Either String String
+displayCart productDb discountDb order = let
+    computed = computeDiscounts productDb discountDb order
+    in either Left (Right . formatDiscountedCart) computed
