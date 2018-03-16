@@ -7,7 +7,7 @@ module Discount
 import           Data.Bool              (bool)
 import           Data.Either
 import           Data.List              (find)
-import qualified Data.Map.Strict as Map
+import qualified Data.Map.Strict as Map (elems, lookup)
 import           Data.Map.Strict        (Map)
 
 import           Discount.Types
@@ -19,12 +19,15 @@ computeDiscounts
     -> Order Int
     -> Either String [LineItem Discounted]
 computeDiscounts productDb discountDb (Order ls discount) = case discount of
+    -- Apply no discount to all products.
     Nothing -> traverse (traverseLookup noDiscount productDb) ls
     Just code -> case findCode code of
+        -- If no discount is found, pretend no discount was applied.
         Nothing ->
             computeDiscounts productDb discountDb (Order ls Nothing)
         Just discount -> case discountType discount of
             AllProducts ->
+                -- Apply the discount to all products.
                 traverse (traverseLookup (yesDiscount discount) productDb) ls
             ProductList ps -> traverse (discountedItem discount ps) ls
     where
