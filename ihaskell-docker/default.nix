@@ -86,6 +86,9 @@ let
       done
     '';
   };
+  ghc_package_path = nixpkgs.runCommand "ghc_package_path" {} ''
+    echo ${ihaskellEnv}/lib/*/package.conf.d | ${nixpkgs.coreutils}/bin/tr ' ' ':' > $out
+  '';
   dockerImage = nixpkgs.dockerTools.buildImage {
     name = "ihaskell";
     contents = fullEnvironment;
@@ -96,7 +99,7 @@ let
     config = {
       Cmd = [ "/bin/ihaskell-notebook" ];
       Env = [
-        ''GHC_PACKAGE_PATH="$(echo ${ihaskellEnv}/lib/*/package.conf.d| ${nixpkgs.coreutils}/bin/tr ' ' ':'):$GHC_PACKAGE_PATH"''
+        ''GHC_PACKAGE_PATH="${lib.removeSuffix "\n" (builtins.readFile ghc_package_path)}:$GHC_PACKAGE_PATH"''
         ''PATH="${nixpkgs.stdenv.lib.makeBinPath ([ ihaskellEnv jupyter ] ++ systemPackages nixpkgs)}"''
       ];
       ExposedPorts = {
