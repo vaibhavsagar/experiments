@@ -1,12 +1,19 @@
-{ nixpkgs ? import <nixpkgs> {}, packages ? (_: []), rtsopts ? "-M3g -N2", systemPackages ? (_: []) }:
+{ packages ? (_: []), rtsopts ? "-M3g -N2", systemPackages ? (_: []) }:
 
 let
+  inherit (import <nixpkgs> {}) fetchFromGitHub;
+  nixpkgs = import (fetchFromGitHub {
+    owner  = "NixOS";
+    repo   = "nixpkgs";
+    rev    = "d16ffa1509008b53891412b095cea259dd73d869";
+    sha256 = "0ir4cbld2c5h31aiap9jhj7mpl0nw2yvr9lmw6zn8ndidniv8ki3";
+  }) {};
   inherit (builtins) any elem filterSource listToAttrs;
   src = nixpkgs.fetchFromGitHub {
     owner = "gibiansky";
     repo = "IHaskell";
-    rev = "736050d05e6b860ce31f0692b2ca49a164d5f053";
-    sha256 = "0haxhqjx0d2cvisn85x9w8fxs4vv4j2pxqaqapvyq62hz2r701lz";
+    rev = "2d43d305d1b0e50ed8dcdcc6b959ef3f3d9cdc0e";
+    sha256 = "0y1a13irikyziva5b4fh3vhmncrh0fdn4dj7k2ar65zj41yd9l13";
   };
   lib = nixpkgs.lib;
   cleanSource = name: type: let
@@ -40,20 +47,6 @@ let
     overrides = self: super: {
       ihaskell       = nixpkgs.haskell.lib.overrideCabal (
                        self.callCabal2nix "ihaskell"       ihaskell-src       {}) (_drv: {
-        postPatch = let
-          # The tests seem to 'buffer' when run during nix-build, so this is
-          # a throw-away test to get everything running smoothly and passing.
-          originalTest = ''
-            describe "Code Evaluation" $ do'';
-          replacementTest = ''
-            describe "Code Evaluation" $ do
-                it "gets rid of the test failure with Nix" $
-                  let throwAway string _ = evaluationComparing (const $ shouldBe True True) string
-                  in throwAway "True" ["True"]'';
-        in ''
-          substituteInPlace ./src/tests/IHaskell/Test/Eval.hs --replace \
-            '${originalTest}' '${replacementTest}'
-        '';
         preCheck = ''
           export HOME=$(${nixpkgs.pkgs.coreutils}/bin/mktemp -d)
           export PATH=$PWD/dist/build/ihaskell:$PATH
@@ -62,6 +55,13 @@ let
       });
       ghc-parser     = self.callCabal2nix "ghc-parser"     ghc-parser-src     {};
       ipython-kernel = self.callCabal2nix "ipython-kernel" ipython-kernel-src {};
+
+      haskell-src-exts  = self.haskell-src-exts_1_20_1;
+      haskell-src-meta  = self.haskell-src-meta_0_8_0_2;
+      hmatrix           = self.hmatrix_0_18_2_0;
+
+      shelly            = nixpkgs.haskell.lib.doJailbreak super.shelly;
+      static-canvas     = nixpkgs.haskell.lib.doJailbreak super.static-canvas;
     } // displays self;
   };
   ihaskellEnv = haskellPackages.ghcWithPackages (self: [ self.ihaskell ] ++ packages self);
