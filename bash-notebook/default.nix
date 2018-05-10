@@ -23,16 +23,19 @@ let
   };
   bashSh = pkgs.writeScriptBin "bash-notebook" ''
     #! ${pkgs.stdenv.shell}
-    export PATH="${pkgs.stdenv.lib.makeBinPath [ jupyter bash_kernel ]}"
+    export PATH="${pkgs.stdenv.lib.makeBinPath [ jupyter bash_kernel pkgs.bash ]}"
     ${pkgs.python3.interpreter} -m bash_kernel.install && ${jupyter}/bin/jupyter notebook
+  '';
+  bash-notebook = pkgs.runCommand "bash-notebook" {} ''
+    mkdir -p $out/bin
+    ln -s ${bashSh}/bin/bash-notebook $out/bin/bash-notebook
   '';
 in
 pkgs.buildEnv {
   name = "bash-notebook-env";
-  paths = [ jupyter bash_kernel ];
+  buildInputs = [ pkgs.makeWrapper ];
+  paths = [ jupyter bash_kernel bash-notebook ];
   postBuild = ''
-    . "${pkgs.makeWrapper}/nix-support/setup-hook"
-    ln -s ${bashSh}/bin/bash-notebook $out/bin/.
     for prg in $out/bin"/"*;do
       wrapProgram $prg --set PYTHONPATH "$(echo ${jupyter}/lib/*/site-packages)"
     done
