@@ -3,6 +3,7 @@ let
 in pkgs.buildFHSUserEnv {
   name = "fhs";
   targetPkgs = pkgs: [
+    pkgs.binutils
     pkgs.blas
     pkgs.cairo.dev
     pkgs.file
