@@ -1,4 +1,4 @@
-{ nixpkgs ? import <nixpkgs> {}, compiler ? "default" }:
+{ nixpkgs ? import <nixpkgs> {}, compiler ? "default", doBenchmark ? false }:
 
 let
 
@@ -11,11 +11,12 @@ let
         src = ./.;
         isLibrary = false;
         isExecutable = true;
-        enableSharedExecutables = false;
-        enableSharedLibraries = false;
         executableHaskellDepends = [ base scotty ];
         license = stdenv.lib.licenses.bsd3;
+        enableSharedExecutables = false;
+        enableSharedLibraries = false;
         configureFlags = [
+          "--ghc-option=-optl=-pthread"
           "--ghc-option=-optl=-static"
           "--ghc-option=-optl=-L${pkgs.gmp6.override { withStatic = true; }}/lib"
           "--ghc-option=-optl=-L${pkgs.zlib.static}/lib"
@@ -27,7 +28,9 @@ let
                        then pkgs.haskellPackages
                        else pkgs.haskell.packages.${compiler};
 
-  drv = haskellPackages.callPackage f {};
+  variant = if doBenchmark then pkgs.haskell.lib.doBenchmark else pkgs.lib.id;
+
+  drv = variant (haskellPackages.callPackage f {});
 
 in
 
