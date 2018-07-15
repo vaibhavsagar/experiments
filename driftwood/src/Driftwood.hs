@@ -101,6 +101,32 @@ instance ToJSON Body where
             [ "type"        .= String "raft_init_ok"
             , "in_reply_to" .= in_reply_to
             ]
+        MError (ErrorBody code text in_reply_to) -> object
+            [ "type"        .= String "error"
+            , "code"        .= code
+            , "text"        .= text
+            , "in_reply_to" .= in_reply_to
+            ]
+        Write (WriteBody msg_id key value) -> object
+            [ "type"   .= String "write"
+            , "msg_id" .= msg_id
+            , "key"    .= key
+            , "value"  .= value
+            ]
+        WriteOk (Reply in_reply_to) -> object
+            [ "type"        .= String "write_ok"
+            , "in_reply_to" .= in_reply_to
+            ]
+        Read (Request msg_id key) -> object
+            [ "type"   .= String "read"
+            , "msg_id" .= msg_id
+            , "key"    .= key
+            ]
+        ReadOk (ReadReply in_reply_to value) -> object
+            [ "type"        .= String "read_ok"
+            , "in_reply_to" .= in_reply_to
+            , "value"       .= value
+            ]
 
 data RaftInitBody
     = RaftInitBody
