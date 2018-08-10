@@ -1,12 +1,11 @@
-let
-  pkgs = import <nixpkgs> {};
-in pkgs.stdenv.mkDerivation {
+{ stdenv, fetchurl, gmp, perl }:
+stdenv.mkDerivation {
   name = "mosml-2.10.1";
-  src = builtins.fetchTarball {
+  src = fetchurl {
     url = "https://github.com/kfl/mosml/archive/ee355b296f393a8a0bf9de9e8dbe8a5915c92ed6.tar.gz";
-    sha256 = "1jiyvdm8bxbfz6l6m1svwi7md5gzp0y5mx4p1dldhd1vyddgvb8q";
+    sha256 = "1dxjjaw0cnngfx55bd25f7nbqbhv7svxsji9f8gmc6sgkpyx9xhv";
   };
-  sourceRoot = "source/src";
-  postPatch = ''substituteInPlace Makefile.inc --replace '/usr/local' "$out"'';
-  buildInputs = [ pkgs.perl pkgs.gmp ];
+  setSourceRoot = ''export sourceRoot="$(echo */src)"'';
+  configurePhase = ''substituteInPlace Makefile.inc --replace '/usr/local' "$out"'';
+  buildInputs = [ gmp perl ];
 }
