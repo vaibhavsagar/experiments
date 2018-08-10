@@ -1,9 +1,12 @@
 { stdenv, fetchurl, gmp, perl }:
+let
+  version = "2.10.1";
+in
 stdenv.mkDerivation {
-  name = "mosml-2.10.1";
+  name = "mosml-${version}";
   src = fetchurl {
-    url = "https://github.com/kfl/mosml/archive/ee355b296f393a8a0bf9de9e8dbe8a5915c92ed6.tar.gz";
-    sha256 = "1dxjjaw0cnngfx55bd25f7nbqbhv7svxsji9f8gmc6sgkpyx9xhv";
+    url = "https://github.com/kfl/mosml/archive/ver-${version}.tar.gz";
+    sha256 = "13x7wj94p0inn84pzpj52dch5s9lznqrj287bd3nk3dqd0v3kmgy";
   };
   setSourceRoot = ''export sourceRoot="$(echo */src)"'';
   configurePhase = ''substituteInPlace Makefile.inc --replace '/usr/local' "$out"'';
