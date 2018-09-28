@@ -12,7 +12,7 @@ import qualified "blake2-patched"    Crypto.Hash.BLAKE2.BLAKE2b as Patched
 import qualified "cryptonite"        Crypto.Hash                as Cryptonite
 
 cryptoniteHash :: BS.ByteString -> BS.ByteString
-cryptoniteHash = B16.encode . B.convert . C.hashWith C.Blake2b_512
+cryptoniteHash = B16.encode . B.convert . Cryptonite.hashWith Cryptonite.Blake2b_512
 {-# INLINE cryptoniteHash #-}
 
 originalHash :: BS.ByteString -> BS.ByteString
