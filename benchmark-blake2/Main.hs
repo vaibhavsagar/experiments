@@ -1,7 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE PackageImports    #-}
+{-# LANGUAGE PackageImports #-}
 
 module Main where
+
+import Data.ByteString.Char8 (pack)
+import Data.List (foldl')
 
 import           "criterion"         Criterion.Main
 import qualified "memory"            Data.ByteArray             as B
@@ -25,16 +28,20 @@ patchedHash = Patched.hash 64 mempty
 
 main :: IO ()
 main = defaultMain
-  [ bgroup "blake2"
-    [
-
-    ]
-  , bgroup "blake2-patched"
-    [
-
-    ]
-  , bgroup "cryptonite"
-    [
-
+  [ bgroup "hashing"
+    [ bench "blake2"         $ nfIO (bencher originalHash)
+    , bench "blake2-patched" $ nfIO (bencher patchedHash)
+    , bench "cryptonite"     $ nfIO (bencher cryptoniteHash)
     ]
   ]
+
+hashes :: IO [BS.ByteString]
+hashes = let
+  ns = map (cryptoniteHash . pack . show) [1..100000]
+  in length ns `seq` pure ns
+
+bencher :: (BS.ByteString -> BS.ByteString) -> IO Bool
+bencher hash = do
+  hs <- hashes
+  let every = foldl' (\(i, b) h -> if (hash . pack . show $ (i+1)) == h then (i+1, b) else (i+1, False)) (0, True) hs
+  pure $ snd every
