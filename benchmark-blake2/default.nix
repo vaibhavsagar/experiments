@@ -5,7 +5,7 @@ let
   inherit (nixpkgs) pkgs;
 
   haskellPackages = pkgs.haskellPackages.extend (self: super: {
-    blake2-patched = self.callPackage (pkgs.fetchFromGitHub {
+    blake2-patched = self.callCabal2nix "blake2-patched" (pkgs.fetchFromGitHub {
       owner = "vaibhavsagar";
       repo = "blake2";
       rev = "86558533c2ec674f27a3c634d93b73a2623c11e2";
