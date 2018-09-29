@@ -3,16 +3,11 @@
 
 name:                benchmark-blake2
 version:             0.1.0.0
--- synopsis:
--- description:
 license:             BSD3
 license-file:        LICENSE
 author:              Vaibhav Sagar
 maintainer:          vaibhavsagar@gmail.com
--- copyright:
--- category:
 build-type:          Simple
-extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 executable bench
