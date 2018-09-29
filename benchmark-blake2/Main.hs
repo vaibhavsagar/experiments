@@ -8,14 +8,16 @@ import Data.List (foldl')
 
 import           "criterion"         Criterion.Main
 import qualified "memory"            Data.ByteArray             as B
+import qualified "memory"            Data.ByteArray.Encoding    as E
 import qualified "base16-bytestring" Data.ByteString.Base16     as B16
 import qualified "bytestring"        Data.ByteString            as BS
+import qualified "bytestring"        Data.ByteString.Char8 (pack)
 import qualified "blake2"            Crypto.Hash.BLAKE2.BLAKE2b as Original
 import qualified "blake2-patched"    Crypto.Hash.BLAKE2.BLAKE2b as Patched
 import qualified "cryptonite"        Crypto.Hash                as Cryptonite
 
 cryptoniteHash :: BS.ByteString -> BS.ByteString
-cryptoniteHash = B16.encode . B.convert . Cryptonite.hashWith Cryptonite.Blake2b_512
+cryptoniteHash = (B.convert :: BS.ByteString -> BS.ByteString) . E.convertToBase E.Base16 . Cryptonite.hashWith Cryptonite.Blake2b_512
 {-# INLINE cryptoniteHash #-}
 
 originalHash :: BS.ByteString -> BS.ByteString
@@ -37,7 +39,7 @@ main = defaultMain
 
 hashes :: IO [BS.ByteString]
 hashes = let
-  ns = map (cryptoniteHash . pack . show) [1..100000]
+  ns = map (patchedHash . pack . show) [1..100000]
   in length ns `seq` pure ns
 
 bencher :: (BS.ByteString -> BS.ByteString) -> IO Bool
