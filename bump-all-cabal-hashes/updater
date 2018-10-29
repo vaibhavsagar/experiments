@@ -8,6 +8,7 @@ FILE=$1
 
 OWNER=$(jq -r '.owner' < "$FILE")
 REPO=$(jq -r '.repo' < "$FILE")
+BRANCH=$(jq -r '.branch' < "$FILE")
 
 JSON=$(curl "https://api.github.com/repos/$OWNER/$REPO/branches/$BRANCH")
 REV=$(echo "$JSON" | jq -r '.commit.sha')
