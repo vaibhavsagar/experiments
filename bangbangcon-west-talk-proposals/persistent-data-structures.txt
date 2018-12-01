@@ -1,0 +1,41 @@
+Talk title:
+Persistent Data Structures Make Your Code Go Round!
+
+Abstract for your talk:
+
+In 2016, Anjana Vakil spoke at !!Con about [persistent data
+structures](https://www.youtube.com/watch?v=vo2A_FBleW4). Let's talk about how
+you are using them every day you write software!
+
+The Git content tracker was built from the ground up on persistent data
+structures and in the interest of both demystifying Git and demonstrating
+practical applications of these techniques, I'll demonstrate what is happening
+when you do a `git add` or a `git commit` in terms of Git's data format!
+
+Timeline for your talk:
+
+1 min: Persistent data structures
+  - Store every history of the data
+  - How is that useful? Isn't it inefficient? What are the different approaches? Downsides?
+
+1 min: How is that useful?
+  - This is Git's job!
+  - You can't rely on it storing every history of the data unless it stores
+    every history of the data!
+
+3 min: Isn't that inefficient?
+  - The most obvious approach is to literally store every version of every file.
+  - Fun fact: this is exactly what Git does! `zlib` compression makes it fine for text.
+  - (demonstrate on a Git repo by `cat file -p`ing a file, changing that file, and `cat file -p`ing it again)
+
+3 min: What are the different approaches?
+  - Path copying: changing every node between the root and a modified file
+  - (demonstrate by changing a file and showing how every intermediate tree object has had its hash changed)
+  - Structural sharing!
+
+2 min: Downsides?
+  - Garbage collection: it's possible to create nodes that are never used
+  - Scaling Git: a large collection of nodes can inconvenient to store and/or transmit over the network
+
+Intended audience:
+Anyone interested persistent data structures and/or learning more about how Git works!
