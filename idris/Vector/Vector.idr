@@ -1,3 +1,5 @@
+module Vector
+
 import Data.IOArray
 
 data Vector elem = MkVector Int (IO (IOArray elem))
@@ -45,3 +47,14 @@ fromList xs = let
     newIOArray <- ioNewIOArray
     flip traverse_ (zip indices xs) $ uncurry (unsafeWriteArray newIOArray)
     pure newIOArray
+
+foldrHelper : Int -> (elem -> acc -> acc) -> acc -> Vector elem -> acc
+foldrHelper index f init input@(MkVector len ioIOArray) = if index == len
+  then init
+  else f (unsafeReadVector input index) $ foldrHelper (index+1) f init input
+
+Foldable Vector where
+  foldr = assert_total $ foldrHelper 0
+
+Functor Vector where
+  map = Vector.map
