@@ -10,6 +10,9 @@ newVector {elem} len = MkVector len $ newArray len (the elem $ believe_me Void)
 empty : Vector a
 empty = newVector 0
 
+singleton : a -> Vector a
+singleton elem = MkVector 1 $ newArray 1 elem
+
 null : Vector a -> Bool
 null (MkVector len _) = len == 0
 
