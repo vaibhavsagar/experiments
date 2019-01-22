@@ -10,6 +10,9 @@ newVector {elem} len = MkVector len $ newArray len (the elem $ believe_me Void)
 empty : Vector a
 empty = newVector 0
 
+null : Vector a -> Bool
+null (MkVector len _) = len == 0
+
 unsafeReadVector : Vector elem -> Int -> elem
 unsafeReadVector (MkVector len ioIOArray) idx = unsafePerformIO $ do
   ioArray <- ioIOArray
@@ -79,6 +82,25 @@ drop {a} n input@(MkVector len ioIOArray) = if len <= n
       unsafeWriteArray newIOArray (index-n) e
     pure newIOArray
 
+append : Vector a -> Vector a -> Vector a
+append {a} vectorA@(MkVector lenA ioIOArrayA) vectorB@(MkVector lenB ioIOArrayB) =
+  if null vectorA
+    then vectorB
+    else if null vectorB
+      then vectorA
+      else MkVector (lenA + lenB) $ do
+        ioArrayA <- ioIOArrayA
+        ioArrayB <- ioIOArrayB
+        let (MkVector _ ioNewIOArray) = newVector (lenA + lenB) {elem=a}
+        newIOArray <- ioNewIOArray
+        flip traverse_ [0..(lenA-1)] $ \index => do
+          e <- unsafeReadArray ioArrayA index
+          unsafeWriteArray newIOArray index e
+        flip traverse_ [0..(lenB-1)] $ \index => do
+          e <- unsafeReadArray ioArrayB index
+          unsafeWriteArray newIOArray (index+lenA) e
+        pure newIOArray
+
 foldrHelper : Int -> (elem -> acc -> acc) -> acc -> Vector elem -> acc
 foldrHelper index f init input@(MkVector len ioIOArray) = if index == len
   then init
@@ -90,10 +112,15 @@ Foldable Vector where
 Functor Vector where
   map = Vector.map
 
+Semigroup (Vector a) where
+  (<+>) = append
+
+Monoid (Vector a) where
+  neutral = empty
 
 main : IO ()
 main = do
   let x = fromList [1..7]
-  let y = take 6 x
-  let z = drop 3 y
-  putStrLn $ show $ toList z
+  let y = fromList [8..12]
+  let z = fromList [13..20]
+  putStrLn $ show $ toList $ concat [x, y, z]
