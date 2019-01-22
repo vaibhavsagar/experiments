@@ -7,6 +7,9 @@ data Vector elem = MkVector Int (IO (IOArray elem))
 newVector : Int -> Vector elem
 newVector {elem} len = MkVector len $ newArray len (the elem $ believe_me Void)
 
+empty : Vector a
+empty = newVector 0
+
 unsafeReadVector : Vector elem -> Int -> elem
 unsafeReadVector (MkVector len ioIOArray) idx = unsafePerformIO $ do
   ioArray <- ioIOArray
@@ -48,6 +51,34 @@ fromList xs = let
     flip traverse_ (zip indices xs) $ uncurry (unsafeWriteArray newIOArray)
     pure newIOArray
 
+take : Int -> Vector a -> Vector a
+take 0 _ = empty
+take n input@(MkVector len ioIOArray) = if n >= len
+  then input
+  else MkVector n $ do
+    ioArray <- ioIOArray
+    let (MkVector _ ioNewIOArray) = newVector n {elem=a}
+    let indices = [0..n-1]
+    newIOArray <- ioNewIOArray
+    flip traverse_ indices $ \index => do
+      e <- unsafeReadArray ioArray index
+      unsafeWriteArray newIOArray index e
+    pure newIOArray
+
+drop : Int -> Vector a -> Vector a
+drop {a} 0 input = input
+drop {a} n input@(MkVector len ioIOArray) = if len <= n
+  then empty
+  else MkVector (len-n) $ do
+    ioArray <- ioIOArray
+    let (MkVector _ ioNewIOArray) = newVector (len-n) {elem=a}
+    let indices : List Int = [n .. (len-1)]
+    newIOArray <- ioNewIOArray
+    flip traverse_ indices $ \index => do
+      e <- unsafeReadArray ioArray index
+      unsafeWriteArray newIOArray (index-n) e
+    pure newIOArray
+
 foldrHelper : Int -> (elem -> acc -> acc) -> acc -> Vector elem -> acc
 foldrHelper index f init input@(MkVector len ioIOArray) = if index == len
   then init
@@ -58,3 +89,11 @@ Foldable Vector where
 
 Functor Vector where
   map = Vector.map
+
+
+main : IO ()
+main = do
+  let x = fromList [1..7]
+  let y = take 6 x
+  let z = drop 3 y
+  putStrLn $ show $ toList z
