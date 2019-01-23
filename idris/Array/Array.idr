@@ -1,30 +1,30 @@
-module Vector
+module Array
 
 import Data.IOArray
 
-data Vector elem = MkVector Int (IO (IOArray elem))
+data Array elem = MkArray Int (IO (IOArray elem))
 
-newVector : Int -> Vector elem
-newVector {elem} len = MkVector len $ newArray len (the elem $ believe_me Void)
+newArray : Int -> Array elem
+newArray {elem} len = MkArray len $ newArray len (the elem $ believe_me Void)
 
-empty : Vector a
-empty = newVector 0
+empty : Array a
+empty = newArray 0
 
-singleton : a -> Vector a
-singleton elem = MkVector 1 $ newArray 1 elem
+singleton : a -> Array a
+singleton elem = MkArray 1 $ newArray 1 elem
 
-null : Vector a -> Bool
-null (MkVector len _) = len == 0
+null : Array a -> Bool
+null (MkArray len _) = len == 0
 
-unsafeReadVector : Vector elem -> Int -> elem
-unsafeReadVector (MkVector len ioIOArray) idx = unsafePerformIO $ do
+unsafeReadArray : Array elem -> Int -> elem
+unsafeReadArray (MkArray len ioIOArray) idx = unsafePerformIO $ do
   ioArray <- ioIOArray
   unsafeReadArray ioArray idx
 
-unsafeWriteVector : Vector elem -> Int -> elem -> Vector elem
-unsafeWriteVector {elem} (MkVector len ioIOArray) idx elm = MkVector len $ do
+unsafeWriteArray : Array elem -> Int -> elem -> Array elem
+unsafeWriteArray {elem} (MkArray len ioIOArray) idx elm = MkArray len $ do
   ioArray <- ioIOArray
-  let (MkVector _ ioNewIOArray) = newVector len {elem}
+  let (MkArray _ ioNewIOArray) = newArray len {elem}
   newIOArray <- ioNewIOArray
   let indices = [0..len-1]
   flip traverse_ indices $ \index => if index == idx
@@ -35,10 +35,10 @@ unsafeWriteVector {elem} (MkVector len ioIOArray) idx elm = MkVector len $ do
       unsafeWriteArray newIOArray index e
   pure newIOArray
 
-map : (a -> b) -> Vector a -> Vector b
-map {b} f (MkVector len ioIOArray) = MkVector len $ do
+map : (a -> b) -> Array a -> Array b
+map {b} f (MkArray len ioIOArray) = MkArray len $ do
   ioArray <- ioIOArray
-  let (MkVector _ ioNewIOArray) = newVector {elem=b} len
+  let (MkArray _ ioNewIOArray) = newArray {elem=b} len
   newIOArray <- ioNewIOArray
   let indices = [0..len-1]
   flip traverse_ indices $ \index => do
@@ -46,24 +46,24 @@ map {b} f (MkVector len ioIOArray) = MkVector len $ do
     unsafeWriteArray newIOArray index (f e)
   pure newIOArray
 
-fromList : List a -> Vector a
-fromList [] = newVector {elem=a} 0
+fromList : List a -> Array a
+fromList [] = newArray {elem=a} 0
 fromList xs = let
   len = toIntNat $ length xs
-  (MkVector _ ioNewIOArray) = newVector len {elem=a}
+  (MkArray _ ioNewIOArray) = newArray len {elem=a}
   indices = [0..len-1]
-  in MkVector len $ do
+  in MkArray len $ do
     newIOArray <- ioNewIOArray
     flip traverse_ (zip indices xs) $ uncurry (unsafeWriteArray newIOArray)
     pure newIOArray
 
-take : Int -> Vector a -> Vector a
+take : Int -> Array a -> Array a
 take 0 _ = empty
-take n input@(MkVector len ioIOArray) = if n >= len
+take n input@(MkArray len ioIOArray) = if n >= len
   then input
-  else MkVector n $ do
+  else MkArray n $ do
     ioArray <- ioIOArray
-    let (MkVector _ ioNewIOArray) = newVector n {elem=a}
+    let (MkArray _ ioNewIOArray) = newArray n {elem=a}
     let indices = [0..n-1]
     newIOArray <- ioNewIOArray
     flip traverse_ indices $ \index => do
@@ -71,13 +71,13 @@ take n input@(MkVector len ioIOArray) = if n >= len
       unsafeWriteArray newIOArray index e
     pure newIOArray
 
-drop : Int -> Vector a -> Vector a
+drop : Int -> Array a -> Array a
 drop {a} 0 input = input
-drop {a} n input@(MkVector len ioIOArray) = if len <= n
+drop {a} n input@(MkArray len ioIOArray) = if len <= n
   then empty
-  else MkVector (len-n) $ do
+  else MkArray (len-n) $ do
     ioArray <- ioIOArray
-    let (MkVector _ ioNewIOArray) = newVector (len-n) {elem=a}
+    let (MkArray _ ioNewIOArray) = newArray (len-n) {elem=a}
     let indices : List Int = [n .. (len-1)]
     newIOArray <- ioNewIOArray
     flip traverse_ indices $ \index => do
@@ -85,16 +85,16 @@ drop {a} n input@(MkVector len ioIOArray) = if len <= n
       unsafeWriteArray newIOArray (index-n) e
     pure newIOArray
 
-append : Vector a -> Vector a -> Vector a
-append {a} vectorA@(MkVector lenA ioIOArrayA) vectorB@(MkVector lenB ioIOArrayB) =
+append : Array a -> Array a -> Array a
+append {a} vectorA@(MkArray lenA ioIOArrayA) vectorB@(MkArray lenB ioIOArrayB) =
   if null vectorA
     then vectorB
     else if null vectorB
       then vectorA
-      else MkVector (lenA + lenB) $ do
+      else MkArray (lenA + lenB) $ do
         ioArrayA <- ioIOArrayA
         ioArrayB <- ioIOArrayB
-        let (MkVector _ ioNewIOArray) = newVector (lenA + lenB) {elem=a}
+        let (MkArray _ ioNewIOArray) = newArray (lenA + lenB) {elem=a}
         newIOArray <- ioNewIOArray
         flip traverse_ [0..(lenA-1)] $ \index => do
           e <- unsafeReadArray ioArrayA index
@@ -104,21 +104,21 @@ append {a} vectorA@(MkVector lenA ioIOArrayA) vectorB@(MkVector lenB ioIOArrayB)
           unsafeWriteArray newIOArray (index+lenA) e
         pure newIOArray
 
-foldrHelper : Int -> (elem -> acc -> acc) -> acc -> Vector elem -> acc
-foldrHelper index f init input@(MkVector len ioIOArray) = if index == len
+foldrHelper : Int -> (elem -> acc -> acc) -> acc -> Array elem -> acc
+foldrHelper index f init input@(MkArray len ioIOArray) = if index == len
   then init
-  else f (unsafeReadVector input index) $ foldrHelper (index+1) f init input
+  else f (unsafeReadArray input index) $ foldrHelper (index+1) f init input
 
-Foldable Vector where
+Foldable Array where
   foldr = assert_total $ foldrHelper 0
 
-Functor Vector where
-  map = Vector.map
+Functor Array where
+  map = Array.map
 
-Semigroup (Vector a) where
+Semigroup (Array a) where
   (<+>) = append
 
-Monoid (Vector a) where
+Monoid (Array a) where
   neutral = empty
 
 main : IO ()
