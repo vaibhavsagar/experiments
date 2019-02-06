@@ -13,5 +13,5 @@ let
   };
 in
   pkgs.mkShell {
-    buildInputs = [ pkgs.atom (haskellPackages.ghcWithPackages (p: [ p.tidal ])) ];
+    buildInputs = [ pkgs.atom (haskellPackages.ghcWithPackages (p: [ p.tidal ])) pkgs.supercollider ];
   }

@@ -47,4 +47,5 @@ let p = streamReplace tidal
     d16 = p "16"
 :}
 
+:set -XOverloadedStrings
 :set prompt "tidal> "
