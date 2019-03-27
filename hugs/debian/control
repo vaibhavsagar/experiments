@@ -1,0 +1,73 @@
+Source: hugs98
+Section: interpreters
+Priority: optional
+Maintainer: Isaac Jones <ijones@debian.org>
+Standards-Version: 3.6.1
+Build-Depends: debhelper (>= 4), autoconf, autotools-dev, bison,
+ libncurses5-dev, libreadline5-dev,
+ libxt-dev, xlibmesa-gl-dev, xlibmesa-glu-dev, freeglut3-dev, libopenal-dev
+
+Package: hugs
+Architecture: any
+Depends: libhugs-base, libhugs-haskell98, ${shlibs:Depends}
+Conflicts: hugs98
+Provides: hugs98
+Replaces: hugs98
+Suggests: haskell-mode, haskell-doc, hugs-cabal, cpphs
+Section: interpreters
+Priority: optional
+Description: A Haskell 98 interpreter
+ Hugs is an interpreter for the non-strict, purely functional programming
+ language Haskell.  This version of Hugs, Hugs 98, supports nearly all of
+ the Haskell 98 specification, as well as a number of extensions.
+ .
+ The Haskell language is described by documents in the haskell-doc
+ package.  Other libraries are documented in the ghc6-doc package.
+
+Package: libhugs-cabal-bundled
+Architecture: any
+Depends: hugs, libhugs-base, ${shlibs:Depends}
+Section: devel
+Priority: optional
+Provides: libhugs-cabal
+Conflicts: libhugs-cabal
+Description: A framework for packaging Haskell software
+ The Haskell Common Architecture for Building Applications and
+ Libraries: a framework defining a common interface for authors to more
+ easily build their Haskell applications in a portable way.
+ .
+ The Haskell Cabal is meant to be a part of a larger infrastructure
+ for distributing, organizing, and cataloging Haskell libraries
+ and tools.
+ .
+ This is the version bundled with the interpreter.
+
+Package: libhugs-base-bundled
+Architecture: any
+Depends: hugs, ${shlibs:Depends}
+Section: devel
+Priority: optional
+Provides: libhugs-base
+Conflicts: libhugs-base
+Description: Basic libraries
+ This package contains the Prelude and its support libraries,
+ and a large collection of useful libraries ranging from data
+ structures to parsing combinators and debugging utilities.
+ .
+ This is the version bundled with the interpreter.
+
+Package: libhugs-haskell98-bundled
+Architecture: any
+Depends: hugs, libhugs-base, ${shlibs:Depends}
+Section: devel
+Priority: optional
+Provides: libhugs-haskell98
+Conflicts: libhugs-haskell98
+Description: Compatibility with Haskell 98
+ This package provides compatibility with the modules of Haskell
+ 98 and the FFI addendum, by means of wrappers around modules from
+ the base package (which in many cases have additional features).
+ However Prelude, Numeric and Foreign are provided directly by
+ the base package.
+ .
+ This is the version bundled with the interpreter.
