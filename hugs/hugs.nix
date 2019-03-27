@@ -8,8 +8,6 @@ stdenv.mkDerivation {
 
   nativeBuildInputs = [ bison ];
 
-  postUnpack = "find -type f -exec sed -i 's@/bin/cp@cp@' {} +";
-
   preConfigure = "unset STRIP";
 
   configureFlags = [
