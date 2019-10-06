@@ -14,7 +14,6 @@ import Data.Vector           (Vector, drop, singleton, take, (!), (//))
 import Data.Word             (Word16, Word32)
 import Numeric               (showIntAtBase)
 import Prelude               hiding (drop, lookup, take)
-import Text.Show.Pretty      (pPrint)
 
 newtype Binary a = Binary a deriving (Enum, Ord, Real, Integral, Eq, Num, Bits, FiniteBits)
 
