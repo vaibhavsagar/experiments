@@ -10,13 +10,23 @@ import Data.Text (pack, unpack, Text)
 import Text.Read (readMaybe)
 import HAMT
 import Text.Show.Pretty (ppShow)
+import Data.Functor ((<$))
+
+data Op = InsertTree | DeleteTree
 
 main = mainWidget $ el "div" $ do
   key <- valueInput
   val <- valueInput
   b <- button "insert"
+  d <- button "delete"
+  let events = leftmost [InsertTree <$ b, DeleteTree <$ d]
   let values = zipDynWith (,) key val
-  tree <- foldDyn (\(k,v) t -> insert k v t) None (tagPromptlyDyn values b)
+  tree <- foldDyn
+    (\((k,v), action) t -> case action of
+      InsertTree -> insert k v t
+      DeleteTree -> delete k t)
+    None
+    (attachPromptlyDyn values events)
   let resultText = fmap (pack . ppShow) tree
   text " = "
   el "pre" $ dynText resultText
