@@ -9,9 +9,10 @@ in (import reflex-platform { system = builtins.currentSystem; }).project ({ pkgs
   useWarp = true;
   packages = {
     rp-example = ./.;
+    hamt = ./hamt;
   };
   shells = {
-    ghc = ["rp-example"];
-    ghcjs = ["rp-example"];
+    ghc = ["rp-example" "hamt"];
+    ghcjs = ["rp-example" "hamt"];
   };
 })
