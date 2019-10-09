@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecursiveDo       #-}
-{-# LANGUAGE MonoLocalBinds    #-}
 
 import Reflex
 import Reflex.Dom
@@ -9,6 +8,7 @@ import qualified Data.Map as Map
 import Data.Text (pack, unpack, Text)
 import Text.Read (readMaybe)
 import Control.Applicative ((<*>), (<$>))
+import Control.Monad.Fix (MonadFix)
 
 main = mainWidget $ el "div" $ do
   nx <- numberInput
@@ -20,7 +20,7 @@ main = mainWidget $ el "div" $ do
   text " = "
   dynText resultText
 
-numberInput :: MonadWidget t m => m (Dynamic t (Maybe Double))
+numberInput :: (DomBuilder t m, MonadFix m) => m (Dynamic t (Maybe Double))
 numberInput = do
   let initAttrs = ("type" =: "number") <> (style False)
       color error = if error then "red" else "green"

@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecursiveDo       #-}
-{-# LANGUAGE MonoLocalBinds    #-}
 
 import Reflex
 import Reflex.Dom
@@ -11,6 +10,7 @@ import Text.Read (readMaybe)
 import HAMT
 import Text.Show.Pretty (ppShow)
 import Data.Functor ((<$))
+import Control.Monad.Fix (MonadFix)
 
 data Op = InsertTree | DeleteTree
 
@@ -31,7 +31,7 @@ main = mainWidget $ el "div" $ do
   text " = "
   el "pre" $ dynText resultText
 
-valueInput :: MonadWidget t m => m (Dynamic t String)
+valueInput :: (MonadWidget t m, MonadFix m) => m (Dynamic t String)
 valueInput = do
   let initAttrs = ("type" =: "string") <> (style False)
       color error = if error then "red" else "green"
