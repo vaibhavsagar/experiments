@@ -13,6 +13,7 @@ import HAMT
 import Text.Show.Pretty (ppShow)
 import Data.Functor ((<$), void)
 import Control.Monad.Fix (MonadFix)
+import Control.Lens ((^.))
 
 import Language.Javascript.JSaddle
 
@@ -36,17 +37,14 @@ main = mainWidgetWithHead widgetHead $ el "div" $ do
   graphVizDiv <- fst <$> el' "div" blank
   el "pre" $ dynText resultText
   performEvent_ $ ffor (updated tree) $ \t -> liftJSM $ do
-    render <- new (jsg @Text "Viz") () >>= \viz ->
-      viz # ("renderSVGElement" :: Text) $ [pack $ dotFromHAMT t]
-    andThen <- render
-      # ("then" :: Text) $ [(fun $ \_ _ [element] -> do
-        e <- toJSVal $ _element_raw graphVizDiv
-        (e <# ("innerHTML" :: Text)) =<< element ! ("outerHTML" :: Text)
-        )]
-    void $ andThen
-      # ("catch" :: Text) $ [(fun $ \_ _ [err] -> void $
-        jsg @Text "console" >>= \console -> console # ("log" :: Text) $ [err]
-        )]
+    viz <- new (jsg @Text "Viz") ()
+    render <- viz ^. js1 @Text "renderSVGElement" (pack $ dotFromHAMT t)
+    andThen <- render ^. js1 @Text "then" (fun $ \_ _ [element] -> do
+      e <- toJSVal $ _element_raw graphVizDiv
+      outerHTML <- element ! ("outerHTML" :: Text)
+      e ^. jss @Text "innerHTML" outerHTML)
+    void $ andThen ^. js1 @Text "catch" (fun $ \_ _ [err] -> void $
+      jsg @Text "console" >>= \console -> console ^. js1 @Text "log" err)
   where
     widgetHead :: (DomBuilder t m) => m ()
     widgetHead = do

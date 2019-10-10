@@ -36,6 +36,7 @@ executable hamt
                      , containers
                      , hamt
                      , jsaddle
+                     , lens
                      , pretty-show
                      , reflex
                      , reflex-dom
