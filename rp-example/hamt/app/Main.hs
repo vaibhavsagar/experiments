@@ -11,7 +11,7 @@ import Data.Text (pack, unpack, Text)
 import Text.Read (readMaybe)
 import HAMT
 import Text.Show.Pretty (ppShow)
-import Data.Functor ((<$))
+import Data.Functor ((<$), void)
 import Control.Monad.Fix (MonadFix)
 
 import Language.Javascript.JSaddle
@@ -23,15 +23,6 @@ main = mainWidgetWithHead widgetHead $ el "div" $ do
   val <- valueInput
   b <- button "insert"
   d <- button "delete"
-  viz <- liftJSM $ eval @Text "(function(id, string) { \
-    \ new Viz().renderSVGElement(string) \
-    \   .then(function(element) { \
-    \     document.getElementById(id).innerHTML = element.outerHTML; \
-    \   }) \
-    \   .catch(function(error) { \
-    \     console.log(error); \
-    \   }) \
-    \ })"
   let events = leftmost [InsertTree <$ b, DeleteTree <$ d]
   let values = zipDynWith (,) key val
   tree <- foldDyn
@@ -44,10 +35,19 @@ main = mainWidgetWithHead widgetHead $ el "div" $ do
   text " = "
   elAttr "div" ("id" =: "graph") blank
   el "pre" $ dynText resultText
-  performEvent $ ffor (updated tree) $ \t -> liftJSM $ do
-    _ <- call viz viz ["graph", pack $ dotFromHAMT t]
-    pure ()
-  pure ()
+  void $ performEvent $ ffor (updated tree) $ \t -> liftJSM $ do
+    render <- new (jsg @Text "Viz") () >>= \viz ->
+      viz # ("renderSVGElement" :: Text) $ [pack $ dotFromHAMT t]
+    andThen <- render
+      # ("then" :: Text) $ [(fun $ \_ _ [element] -> do
+        toReplace <- jsg @Text "document" >>= \d ->
+          d # ("getElementById" :: Text) $ [("graph" :: Text)]
+        (toReplace <# ("innerHTML" :: Text)) =<< element ! ("outerHTML" :: Text)
+        )]
+    void $ andThen
+      # ("catch" :: Text) $ [(fun $ \_ _ [err] -> void $
+        jsg @Text "console" >>= \console -> console # ("log" :: Text) $ [err]
+        )]
   where
     widgetHead :: (DomBuilder t m) => m ()
     widgetHead = do
