@@ -15,6 +15,13 @@ import Data.Word             (Word16, Word32)
 import Numeric               (showIntAtBase)
 import Prelude               hiding (drop, lookup, take)
 
+import Control.Monad.Trans.State.Strict
+import Control.Monad.Trans.Writer.CPS
+import Control.Monad.Trans.Class
+import qualified Data.Vector as Vector
+import Data.List (intercalate, intersperse, foldl')
+import qualified Prelude
+
 newtype Binary a = Binary a deriving (Enum, Ord, Real, Integral, Eq, Num, Bits, FiniteBits)
 
 instance (FiniteBits a, Show a, Integral a) => Show (Binary a) where
@@ -234,3 +241,87 @@ delete' shift hash key coll@(Coll collHash vector)
                 in if currKey == key
                     then deleteAt vector index
                     else deleteMatching (index+1) len key vector
+
+data TreeNode
+    = TreeNode { nodeId :: Int, bitmap   :: String, fields :: [Int] }
+    | LeafNode { leafId :: Int, leafHash :: String, leafKey :: String, leafValue :: String }
+    | CollNode { collId :: Int, collHash :: String, collPairs :: [(String, String)]}
+    deriving (Eq, Show)
+
+getFreshId :: State Int Int
+getFreshId = do
+    currentId <- get
+    put (currentId+1)
+    pure currentId
+
+number :: (Show k, Show v) => HAMT k v -> WriterT [TreeNode] (State Int) Int
+number None = error "does not work with empty HAMTs"
+number (Leaf h k v) = do
+    i <- lift $ getFreshId
+    tell [(LeafNode i (show h) (show k) (show v))]
+    pure i
+number (Many b hs) = do
+    i <- lift $ getFreshId
+    numbered <- Vector.toList <$> traverse number hs
+    tell [(TreeNode i (show b) numbered)]
+    pure i
+number (Full hs) = do
+    i <- lift $ getFreshId
+    numbered <- Vector.toList <$> traverse number hs
+    tell [(TreeNode i "FULL" numbered)]
+    pure i
+number (Coll h kvs) = do
+    i <- lift $ getFreshId
+    tell [CollNode i (show h) (map (\(k,v) -> (show k, show v)) (Vector.toList kvs))]
+    pure i
+
+nodeData :: (Show k, Show v) => HAMT k v -> [TreeNode]
+nodeData = flip evalState 0 . execWriterT . number
+
+escape = concatMap escaper
+    where
+        escaper :: Char -> String
+        escaper c = case c of
+            '"'  -> "\\\""
+            '\\' -> "\\\\"
+            _    -> [c]
+
+nodeLines :: TreeNode -> [String]
+nodeLines (LeafNode i h k v) = let
+    label = intercalate "|" [h, k, v]
+    line = ("n" ++ show i) ++ " " ++ "[label=\"" ++ escape label ++ "\"]"
+    in [line]
+nodeLines (CollNode i h kvs) = let
+    label = intercalate "|" [h, shownKvs]
+    line = ("n" ++ show i) ++ " " ++ "[label=\"" ++ escape label ++ "\"]"
+    in [line]
+    where
+        shownKvs = intercalate "|" $ map (\(k,v) -> k ++ " : " ++ v) kvs
+nodeLines (TreeNode i b fs) = let
+    indices = Prelude.take (length fs) [0..]
+    pairs = zip indices fs
+    edges = flip map pairs $ \(f,t) -> "n" ++ show i ++ ":" ++ "f" ++ show f ++ " -> " ++ "n" ++ show t
+    fields = flip map indices $ \ix -> "<f" ++ show ix ++ ">"
+    label = intercalate "|" $ b:fields
+    line = ("n" ++ show i) ++ " " ++ "[label=\"" ++ escape label ++ "\"]"
+    in (line:edges)
+
+makeLines = concatMap nodeLines
+
+makeDotLines :: [String] -> String
+makeDotLines = concatMap (\l -> l ++ ";\n")
+
+preamble = unlines $
+    [ "digraph {"
+    , "node [shape=record];"
+    , "splines=false;"
+    , "ranksep=2;"
+    , "nodesep=1;"
+    ]
+postamble = unlines $ ["}"]
+
+makeDot :: String -> String
+makeDot str = preamble ++ str ++ postamble
+
+dotFromHAMT :: (Show k, Show v) => HAMT k v -> String
+dotFromHAMT = makeDot . makeDotLines. makeLines . nodeData

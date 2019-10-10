@@ -7,6 +7,7 @@ let
   reflex-platform = fetcher (builtins.fromJSON (builtins.readFile ./versions.json)).reflex-platform;
 in (import reflex-platform { system = builtins.currentSystem; }).project ({ pkgs, ... }: {
   useWarp = true;
+  withHoogle = false;
   packages = {
     rp-example = ./.;
     hamt = ./hamt;

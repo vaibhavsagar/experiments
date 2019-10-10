@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecursiveDo       #-}
+{-# LANGUAGE MonoLocalBinds    #-}
 
 import Reflex
 import Reflex.Dom
@@ -12,9 +13,11 @@ import Text.Show.Pretty (ppShow)
 import Data.Functor ((<$))
 import Control.Monad.Fix (MonadFix)
 
+import Language.Javascript.JSaddle
+
 data Op = InsertTree | DeleteTree
 
-main = mainWidget $ el "div" $ do
+main = mainWidgetWithHead widgetHead $ el "div" $ do
   key <- valueInput
   val <- valueInput
   b <- button "insert"
@@ -30,8 +33,13 @@ main = mainWidget $ el "div" $ do
   let resultText = fmap (pack . ppShow) tree
   text " = "
   el "pre" $ dynText resultText
+  where
+    widgetHead :: (DomBuilder t m) => m ()
+    widgetHead = do
+      elAttr "script" ("type" =: "text/javascript" <> "src" =: "https://cdn.jsdelivr.net/npm/viz.js@2.1.2/viz.min.js") blank
+      elAttr "script" ("type" =: "text/javascript" <> "src" =: "https://cdn.jsdelivr.net/npm/viz.js@2.1.2/full.render.min.js") blank
 
-valueInput :: (MonadWidget t m, MonadFix m) => m (Dynamic t String)
+valueInput :: (DomBuilder t m, MonadFix m) => m (Dynamic t String)
 valueInput = do
   let initAttrs = ("type" =: "string") <> (style False)
       color error = if error then "red" else "green"

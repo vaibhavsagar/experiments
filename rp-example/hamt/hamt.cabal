@@ -23,6 +23,7 @@ library
   build-depends:       base >=4.12 && <4.13
                      , bytestring
                      , memory
+                     , transformers
                      , vector
   hs-source-dirs:      src
   default-language:    Haskell2010
@@ -32,8 +33,9 @@ executable hamt
   -- other-modules:
   -- other-extensions:
   build-depends:       base >=4.12 && <4.13
-                     , hamt
                      , containers
+                     , hamt
+                     , jsaddle
                      , pretty-show
                      , reflex
                      , reflex-dom
