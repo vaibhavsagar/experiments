@@ -24,15 +24,13 @@ main = mainWidgetWithHead widgetHead $ el "div" $ do
   b <- button "insert"
   d <- button "delete"
   viz <- liftJSM $ eval @Text "(function(id, string) { \
-    \ var viz = new Viz(); \
-    \ viz.renderSVGElement(string) \
-      \ .then(function(element) { \
-        \ document.getElementById(id).innerHTML = element.outerHTML; \
-      \ }) \
-      \ .catch(function(error) { \
-        \ viz = new Viz(); \
-        \ console.log(error); \
-      \ }) \
+    \ new Viz().renderSVGElement(string) \
+    \   .then(function(element) { \
+    \     document.getElementById(id).innerHTML = element.outerHTML; \
+    \   }) \
+    \   .catch(function(error) { \
+    \     console.log(error); \
+    \   }) \
     \ })"
   let events = leftmost [InsertTree <$ b, DeleteTree <$ d]
   let values = zipDynWith (,) key val
