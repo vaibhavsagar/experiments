@@ -33,16 +33,15 @@ main = mainWidgetWithHead widgetHead $ el "div" $ do
     (attachPromptlyDyn values events)
   let resultText = fmap (pack . dotFromHAMT) tree
   text " = "
-  elAttr "div" ("id" =: "graph") blank
+  graphVizDiv <- fst <$> el' "div" blank
   el "pre" $ dynText resultText
-  void $ performEvent $ ffor (updated tree) $ \t -> liftJSM $ do
+  performEvent_ $ ffor (updated tree) $ \t -> liftJSM $ do
     render <- new (jsg @Text "Viz") () >>= \viz ->
       viz # ("renderSVGElement" :: Text) $ [pack $ dotFromHAMT t]
     andThen <- render
       # ("then" :: Text) $ [(fun $ \_ _ [element] -> do
-        toReplace <- jsg @Text "document" >>= \d ->
-          d # ("getElementById" :: Text) $ [("graph" :: Text)]
-        (toReplace <# ("innerHTML" :: Text)) =<< element ! ("outerHTML" :: Text)
+        e <- toJSVal $ _element_raw graphVizDiv
+        (e <# ("innerHTML" :: Text)) =<< element ! ("outerHTML" :: Text)
         )]
     void $ andThen
       # ("catch" :: Text) $ [(fun $ \_ _ [err] -> void $
