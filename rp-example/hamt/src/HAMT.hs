@@ -255,7 +255,7 @@ getFreshId = do
     pure currentId
 
 number :: (Show k, Show v) => HAMT k v -> WriterT [TreeNode] (State Int) Int
-number None = error "does not work with empty HAMTs"
+number None = tell mempty >> pure 0
 number (Leaf h k v) = do
     i <- lift $ getFreshId
     tell [(LeafNode i (show h) (show k) (show v))]

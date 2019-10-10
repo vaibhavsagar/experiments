@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecursiveDo       #-}
-{-# LANGUAGE MonoLocalBinds    #-}
+{-# LANGUAGE TypeApplications  #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 import Reflex
 import Reflex.Dom
@@ -22,6 +23,17 @@ main = mainWidgetWithHead widgetHead $ el "div" $ do
   val <- valueInput
   b <- button "insert"
   d <- button "delete"
+  viz <- liftJSM $ eval @Text "(function(id, string) { \
+    \ var viz = new Viz(); \
+    \ viz.renderSVGElement(string) \
+      \ .then(function(element) { \
+        \ document.getElementById(id).innerHTML = element.outerHTML; \
+      \ }) \
+      \ .catch(function(error) { \
+        \ viz = new Viz(); \
+        \ console.log(error); \
+      \ }) \
+    \ })"
   let events = leftmost [InsertTree <$ b, DeleteTree <$ d]
   let values = zipDynWith (,) key val
   tree <- foldDyn
@@ -30,9 +42,14 @@ main = mainWidgetWithHead widgetHead $ el "div" $ do
       DeleteTree -> delete k t)
     None
     (attachPromptlyDyn values events)
-  let resultText = fmap (pack . ppShow) tree
+  let resultText = fmap (pack . dotFromHAMT) tree
   text " = "
+  elAttr "div" ("id" =: "graph") blank
   el "pre" $ dynText resultText
+  performEvent $ ffor (updated tree) $ \t -> liftJSM $ do
+    _ <- call viz viz ["graph", pack $ dotFromHAMT t]
+    pure ()
+  pure ()
   where
     widgetHead :: (DomBuilder t m) => m ()
     widgetHead = do
