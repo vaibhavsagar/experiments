@@ -300,7 +300,7 @@ nodeLines (CollNode i h kvs) = let
 nodeLines (TreeNode i b fs) = let
     indices = Prelude.take (length fs) [0..]
     pairs = zip indices fs
-    edges = flip map pairs $ \(f,t) -> "n" ++ show i ++ ":" ++ "f" ++ show f ++ " -> " ++ "n" ++ show t
+    edges = flip map pairs $ \(f,t) -> "n" ++ show i ++ ":" ++ "f" ++ show f ++ ":s -> " ++ "n" ++ show t ++ ":n"
     fields = flip map indices $ \ix -> "<f" ++ show ix ++ ">"
     label = intercalate "|" $ b:fields
     line = ("n" ++ show i) ++ " " ++ "[label=\"" ++ escape label ++ "\"]"
