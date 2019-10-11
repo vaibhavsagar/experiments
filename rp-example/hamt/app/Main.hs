@@ -14,6 +14,7 @@ import Text.Show.Pretty (ppShow)
 import Data.Functor ((<$), void)
 import Control.Monad.Fix (MonadFix)
 import Control.Lens ((^.))
+import Control.Monad (join)
 
 import Language.Javascript.JSaddle
 
@@ -34,22 +35,26 @@ main = mainWidgetWithHead widgetHead $ el "div" $ do
     (attachPromptlyDyn values events)
   let hamtDot = fmap (pack . dotFromHAMT) tree
   text " = "
-  graphVizDiv <- toJSVal . _element_raw . fst <$> el' "div" blank
+  graphVizDiv <- _element_raw . fst <$> el' "div" blank
   el "pre" $ dynText hamtDot
-  performEvent_ $ ffor (updated hamtDot) $ \dot -> liftJSM $ do
-    viz <- new (jsg @Text "Viz") ()
-    render <- viz ^. js1 @Text "renderSVGElement" dot
-    andThen <- render ^. js1 @Text "then" (fun $ \_ _ [element] -> do
-      outerHTML <- element ! ("outerHTML" :: Text)
-      graphVizDiv ^. jss @Text "innerHTML" outerHTML)
-    void $ andThen ^. js1 @Text "catch" (fun $ \_ _ [err] -> void $
-      jsg @Text "console" >>= \console -> console ^. js1 @Text "log" err)
+  performEvent_ $ ffor (updated hamtDot) $ \dotText ->
+    liftJSM . join $ viz <$> toJSVal graphVizDiv <*> toJSVal dotText
   where
     widgetHead :: (DomBuilder t m) => m ()
     widgetHead = do
       script "https://cdn.jsdelivr.net/npm/viz.js@2.1.2/viz.min.js"
       script "https://cdn.jsdelivr.net/npm/viz.js@2.1.2/full.render.min.js"
     script src = elAttr "script" ("type" =: "text/javascript" <> "src" =: src) blank
+
+viz :: JSVal -> JSVal -> JSM ()
+viz graphVizDiv dot = do
+  viz <- new (jsg @Text "Viz") ()
+  render <- viz ^. js1 @Text "renderSVGElement" dot
+  andThen <- render ^. js1 @Text "then" (fun $ \_ _ [element] -> do
+    outerHTML <- element ! ("outerHTML" :: Text)
+    graphVizDiv ^. jss @Text "innerHTML" outerHTML)
+  void $ andThen ^. js1 @Text "catch" (fun $ \_ _ [err] -> void $
+    jsg @Text "console" >>= \console -> console ^. js1 @Text "log" err)
 
 valueInput :: (DomBuilder t m, MonadFix m) => Text -> m (Dynamic t String)
 valueInput placeholder = do
