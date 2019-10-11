@@ -20,8 +20,8 @@ import Language.Javascript.JSaddle
 data Op = InsertTree | DeleteTree
 
 main = mainWidgetWithHead widgetHead $ el "div" $ do
-  key <- valueInput
-  val <- valueInput
+  key <- valueInput "key"
+  val <- valueInput "value"
   b <- button "insert"
   d <- button "delete"
   let events = leftmost [InsertTree <$ b, DeleteTree <$ d]
@@ -32,28 +32,28 @@ main = mainWidgetWithHead widgetHead $ el "div" $ do
       DeleteTree -> delete k t)
     None
     (attachPromptlyDyn values events)
-  let resultText = fmap (pack . dotFromHAMT) tree
+  let hamtDot = fmap (pack . dotFromHAMT) tree
   text " = "
-  graphVizDiv <- fst <$> el' "div" blank
-  el "pre" $ dynText resultText
-  performEvent_ $ ffor (updated tree) $ \t -> liftJSM $ do
+  graphVizDiv <- toJSVal . _element_raw . fst <$> el' "div" blank
+  el "pre" $ dynText hamtDot
+  performEvent_ $ ffor (updated hamtDot) $ \dot -> liftJSM $ do
     viz <- new (jsg @Text "Viz") ()
-    render <- viz ^. js1 @Text "renderSVGElement" (pack $ dotFromHAMT t)
+    render <- viz ^. js1 @Text "renderSVGElement" dot
     andThen <- render ^. js1 @Text "then" (fun $ \_ _ [element] -> do
-      e <- toJSVal $ _element_raw graphVizDiv
       outerHTML <- element ! ("outerHTML" :: Text)
-      e ^. jss @Text "innerHTML" outerHTML)
+      graphVizDiv ^. jss @Text "innerHTML" outerHTML)
     void $ andThen ^. js1 @Text "catch" (fun $ \_ _ [err] -> void $
       jsg @Text "console" >>= \console -> console ^. js1 @Text "log" err)
   where
     widgetHead :: (DomBuilder t m) => m ()
     widgetHead = do
-      elAttr "script" ("type" =: "text/javascript" <> "src" =: "https://cdn.jsdelivr.net/npm/viz.js@2.1.2/viz.min.js") blank
-      elAttr "script" ("type" =: "text/javascript" <> "src" =: "https://cdn.jsdelivr.net/npm/viz.js@2.1.2/full.render.min.js") blank
+      script "https://cdn.jsdelivr.net/npm/viz.js@2.1.2/viz.min.js"
+      script "https://cdn.jsdelivr.net/npm/viz.js@2.1.2/full.render.min.js"
+    script src = elAttr "script" ("type" =: "text/javascript" <> "src" =: src) blank
 
-valueInput :: (DomBuilder t m, MonadFix m) => m (Dynamic t String)
-valueInput = do
-  let initAttrs = ("type" =: "string") <> (style False)
+valueInput :: (DomBuilder t m, MonadFix m) => Text -> m (Dynamic t String)
+valueInput placeholder = do
+  let initAttrs = ("type" =: "string") <> (style False) <> ("placeholder" =: placeholder)
       color error = if error then "red" else "green"
       style error = "style" =: ("border-color: " <> color error)
       styleChange :: Maybe Double -> Map AttributeName (Maybe Text)
