@@ -1,7 +1,7 @@
 let
   nixpkgs-src = builtins.fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/tarball/4f31c024d1e40b8e19badc832c8a99ce19143a5b";
-    sha256 = "0gqkf7spy60y4bycy3f3fg99wv77q7mhkg8c1a4s3gw51nakwvq8";
+    url = "https://github.com/NixOS/nixpkgs/tarball/6d445f8398d2d585d20d9acacf00fd9d15081b3b";
+    sha256 = "1ajd0zr31iny3g9hp0pc1y2pxcm3nakdv6260lnvyn0k4vygync2";
   };
   pkgs = import nixpkgs-src {};
 in pkgs.buildFHSUserEnv {
