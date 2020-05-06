@@ -151,7 +151,7 @@ module HscTypes (
         mkCompleteMatchMap, extendCompleteMatchMap
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

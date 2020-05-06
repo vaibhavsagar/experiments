@@ -50,7 +50,7 @@ module TyCoSubst
         checkValidSubst, isValidTCvSubst,
   ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

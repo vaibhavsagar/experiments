@@ -26,7 +26,7 @@ module Rules (
         lookupRule, mkRule, roughTopNames
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

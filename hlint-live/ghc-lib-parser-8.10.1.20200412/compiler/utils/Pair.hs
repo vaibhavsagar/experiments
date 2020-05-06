@@ -8,7 +8,7 @@ Traversable instances.
 
 module Pair ( Pair(..), unPair, toPair, swap, pLiftFst, pLiftSnd ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

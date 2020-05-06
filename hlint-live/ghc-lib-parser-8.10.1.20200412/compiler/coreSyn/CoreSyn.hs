@@ -95,7 +95,7 @@ module CoreSyn (
         isBuiltinRule, isLocalRule, isAutoRule,
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

@@ -31,7 +31,7 @@ module NameSet (
         findUses, duDefs, duUses, allUses
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

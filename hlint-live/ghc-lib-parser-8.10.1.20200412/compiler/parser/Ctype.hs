@@ -14,7 +14,7 @@ module Ctype
         , hexDigit, octDecDigit
         ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

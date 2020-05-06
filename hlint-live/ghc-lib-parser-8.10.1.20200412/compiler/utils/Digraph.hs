@@ -25,7 +25,7 @@ module Digraph(
         EdgeType(..), classifyEdges
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 ------------------------------------------------------------------------------
 -- A version of the graph algorithms described in:

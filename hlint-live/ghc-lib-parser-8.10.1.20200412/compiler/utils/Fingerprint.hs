@@ -21,7 +21,7 @@ module Fingerprint (
         getFileHash
    ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

@@ -4,7 +4,7 @@
 -- (c) The University of Glasgow
 --
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 module Avail (
     Avails,

@@ -32,7 +32,7 @@ module GHC.HsToCore.PmCheck.Types (
         VarInfo(..), TmState(..), TyState(..), Delta(..), initDelta
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

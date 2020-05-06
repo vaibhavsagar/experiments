@@ -47,7 +47,7 @@ module TcEvidence (
   tcCoercionRole,
   unwrapIP, wrapIP
   ) where
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

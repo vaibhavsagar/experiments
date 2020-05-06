@@ -95,7 +95,7 @@ module GHC.Hs.Utils(
   lStmtsImplicits, hsValBindsImplicits, lPatImplicits
   ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

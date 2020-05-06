@@ -4,7 +4,7 @@
 
 module OptCoercion ( optCoercion, checkAxInstCo ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

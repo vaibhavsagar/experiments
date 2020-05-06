@@ -29,7 +29,7 @@ module InstEnv (
         isOverlappable, isOverlapping, isIncoherent
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

@@ -87,7 +87,7 @@ module TysPrim(
 #include "primop-vector-tys-exports.hs-incl"
   ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

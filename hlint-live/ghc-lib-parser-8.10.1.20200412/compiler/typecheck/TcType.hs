@@ -187,7 +187,7 @@ module TcType (
 
   ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 -- friends:
 import GhcPrelude

@@ -50,7 +50,7 @@ module MkCore (
         tYPE_ERROR_ID, aBSENT_SUM_FIELD_ERROR_ID
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

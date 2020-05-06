@@ -114,7 +114,7 @@ module Coercion (
         simplifyArgsWorker
        ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import {-# SOURCE #-} ToIface (toIfaceTyCon, tidyToIfaceTcArgs)
 

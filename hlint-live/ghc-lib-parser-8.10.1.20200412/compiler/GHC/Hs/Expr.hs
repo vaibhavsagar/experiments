@@ -18,7 +18,7 @@
 -- | Abstract Haskell syntax for expressions.
 module GHC.Hs.Expr where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 -- friends:
 import GhcPrelude

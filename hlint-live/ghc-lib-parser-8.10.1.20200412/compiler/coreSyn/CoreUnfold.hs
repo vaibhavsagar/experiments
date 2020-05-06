@@ -40,7 +40,7 @@ module CoreUnfold (
         exprIsConApp_maybe, exprIsLiteral_maybe
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

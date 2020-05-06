@@ -142,7 +142,7 @@ import Data.Char
 import qualified Data.Monoid as Monoid
 import Data.Data       ( dataTypeOf, fromConstr, dataTypeConstrs )
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 
 {- **********************************************************************

@@ -44,7 +44,7 @@ module StringBuffer
         parseUnsignedInteger,
        ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

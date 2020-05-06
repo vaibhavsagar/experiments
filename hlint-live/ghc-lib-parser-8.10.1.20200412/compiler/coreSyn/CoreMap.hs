@@ -35,7 +35,7 @@ module CoreMap(
    (>.>), (|>), (|>>),
  ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

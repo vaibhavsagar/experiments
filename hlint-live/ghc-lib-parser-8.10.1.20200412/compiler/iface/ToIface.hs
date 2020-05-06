@@ -43,7 +43,7 @@ module ToIface
     , toIfaceVar
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

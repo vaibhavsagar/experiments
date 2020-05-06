@@ -67,7 +67,7 @@ module Unique (
         dataConWorkerUnique, dataConTyRepNameUnique
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 #include "Unique.h"
 
 import GhcPrelude

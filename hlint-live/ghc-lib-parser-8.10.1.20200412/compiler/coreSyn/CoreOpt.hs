@@ -18,7 +18,7 @@ module CoreOpt (
         pushCoArg, pushCoValArg, pushCoTyArg, collectBindersPushingCo
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

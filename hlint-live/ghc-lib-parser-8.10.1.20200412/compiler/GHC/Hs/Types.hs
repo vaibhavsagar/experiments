@@ -70,7 +70,7 @@ module GHC.Hs.Types (
         hsTypeNeedsParens, parenthesizeHsType, parenthesizeHsContext
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

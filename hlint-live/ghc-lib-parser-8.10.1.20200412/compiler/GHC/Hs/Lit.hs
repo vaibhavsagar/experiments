@@ -17,7 +17,7 @@
 
 module GHC.Hs.Lit where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

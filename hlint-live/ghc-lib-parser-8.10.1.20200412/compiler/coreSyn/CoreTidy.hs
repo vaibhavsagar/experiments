@@ -12,7 +12,7 @@ module CoreTidy (
         tidyExpr, tidyRules, tidyUnfolding
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

@@ -155,7 +155,7 @@ module PrelNames (
                                 -- So many that we export them all
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

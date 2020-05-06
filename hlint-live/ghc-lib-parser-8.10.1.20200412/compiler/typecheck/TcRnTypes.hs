@@ -82,7 +82,7 @@ module TcRnTypes(
         lookupRoleAnnot, getRoleAnnots
   ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

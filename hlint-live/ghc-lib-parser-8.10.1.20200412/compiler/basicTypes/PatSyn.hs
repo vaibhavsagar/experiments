@@ -22,7 +22,7 @@ module PatSyn (
         updatePatSynIds, pprPatSynType
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

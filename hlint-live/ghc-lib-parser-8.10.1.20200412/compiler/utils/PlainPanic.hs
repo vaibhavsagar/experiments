@@ -25,7 +25,7 @@ module PlainPanic
   , progName
   ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import Config
 import Exception

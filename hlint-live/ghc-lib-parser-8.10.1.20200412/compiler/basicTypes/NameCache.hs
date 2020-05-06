@@ -20,7 +20,7 @@ import Util
 import Outputable
 import PrelNames
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 {-
 

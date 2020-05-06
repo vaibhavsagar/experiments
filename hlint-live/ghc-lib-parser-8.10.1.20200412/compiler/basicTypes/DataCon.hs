@@ -59,7 +59,7 @@ module DataCon (
         promoteDataCon
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

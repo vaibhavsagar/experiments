@@ -47,7 +47,7 @@ module Literal
         , nullAddrLit, rubbishLit, float2DoubleLit, double2FloatLit
         ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

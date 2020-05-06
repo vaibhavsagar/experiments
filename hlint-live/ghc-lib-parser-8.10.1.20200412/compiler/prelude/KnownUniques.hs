@@ -24,7 +24,7 @@ module KnownUniques
     , mkCTupleDataConUnique
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

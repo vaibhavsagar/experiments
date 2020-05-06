@@ -57,7 +57,7 @@ module CoreFVs (
         freeVarsOfAnn
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 

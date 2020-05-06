@@ -65,7 +65,7 @@ module TyCoRep (
         typeSize, coercionSize, provSize
     ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 
@@ -273,7 +273,7 @@ about it!
       checker can handle it; see #16185
 
       For now we use the CPP macro #define FunTy FFunTy _
-      (see HsVersions.h) to allow pattern matching on a
+      (see HsVersions_.h) to allow pattern matching on a
       (positional) FunTy constructor.
 
 {-# COMPLETE FunTy, TyVarTy, AppTy, TyConApp

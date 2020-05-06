@@ -245,7 +245,7 @@ module DynFlags (
         CfgWeights(..), backendMaintainsCfg
   ) where
 
-#include "HsVersions.h"
+#include "HsVersions_.h"
 
 import GhcPrelude
 
