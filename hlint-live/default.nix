@@ -12,20 +12,13 @@ in (import reflex-platform { system = builtins.currentSystem; hieSupport = false
       ver = "1.7.1";
       sha256 = "0n23dhsfjjdmprgmdsrrma8q8ys0zc4ab5vhzmiy2f9gkm0jg0pq";
     } {};
-    ghc-lib-parser = pkgs.haskell.lib.dontHaddock (self.callHackageDirect {
-      pkg = "ghc-lib-parser";
-      ver = "8.10.1.20200412";
-      sha256 = "05adhjbvkgpx0bwzv1klc2a356d23zqdbj502iapqksirjkk6cqj";
-    } {});
+    ghc-lib-parser = pkgs.haskell.lib.dontHaddock (self.callCabal2nix "ghc-lib-parser" ./ghc-lib-parser-8.10.1.20200412 {});
     ghc-lib-parser-ex = self.callHackageDirect {
       pkg = "ghc-lib-parser-ex";
       ver = "8.10.0.6";
       sha256 = "043r3j57312ishccq4hwkb4wmh7f98is61kp483xh5sq4r5zqs2x";
     } {};
-    hlint = self.callCabal2nix "hlint" (builtins.fetchTarball {
-      url = "https://github.com/ndmitchell/hlint/tarball/510277ee0d24d17c9cb33d2832fe089ee8c29631";
-      sha256 = "0z74g0xz2rcqqvilmy8dlljj4jhwfs2dkims3nclrryamzak94b6";
-    }) {};
+    hlint = self.callCabal2nix "hlint" ./hlint-3.0.4 {};
     hpc = self.callHackage "hpc" "0.6.0.3" { };
     patch = pkgs.haskell.lib.dontCheck super.patch;
     reflex = pkgs.haskell.lib.dontCheck super.reflex;
