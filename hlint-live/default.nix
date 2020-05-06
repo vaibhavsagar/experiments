@@ -26,6 +26,10 @@ in (import reflex-platform { system = builtins.currentSystem; hieSupport = false
       url = "https://github.com/ndmitchell/hlint/tarball/510277ee0d24d17c9cb33d2832fe089ee8c29631";
       sha256 = "0z74g0xz2rcqqvilmy8dlljj4jhwfs2dkims3nclrryamzak94b6";
     }) {};
+    hpc = self.callHackage "hpc" "0.6.0.3" { };
+    patch = pkgs.haskell.lib.dontCheck super.patch;
+    reflex = pkgs.haskell.lib.dontCheck super.reflex;
+    reflex-dom-core = pkgs.haskell.lib.dontCheck super.reflex-dom-core;
   };
   useWarp = true;
   withHoogle = false;

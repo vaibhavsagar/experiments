@@ -23,5 +23,9 @@ executable hlint-live
   -- other-extensions:
   build-depends:       base >=4.12 && <4.13
                      , hlint
+                     , jsaddle
+                     , reflex-dom
+                     , reflex
+                     , text
   -- hs-source-dirs:
   default-language:    Haskell2010
