@@ -1,7 +1,7 @@
 let
   nixpkgs-src = builtins.fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/tarball/6d445f8398d2d585d20d9acacf00fd9d15081b3b";
-    sha256 = "1ajd0zr31iny3g9hp0pc1y2pxcm3nakdv6260lnvyn0k4vygync2";
+    url = "https://github.com/NixOS/nixpkgs/tarball/4b6bfecc0bd30c7740b9e9fa849de9e5df8d6e26";
+    sha256 = "0wi8641v4345jcqk7myq3dknczps1gbsf48q314wavl5kga8r67f";
   };
   pkgs = import nixpkgs-src {};
 in pkgs.buildFHSUserEnv {
@@ -17,7 +17,7 @@ in pkgs.buildFHSUserEnv {
     pkgs.glib.dev
     pkgs.gmp
     pkgs.gnumake
-    pkgs.haskell.compiler.ghc865
+    pkgs.haskell.compiler.ghc883
     pkgs.cabal-install
     pkgs.haskellPackages.alex
     pkgs.haskellPackages.cpphs
