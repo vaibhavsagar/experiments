@@ -18,7 +18,7 @@ in (import reflex-platform { system = builtins.currentSystem; hieSupport = false
       ver = "8.10.0.6";
       sha256 = "043r3j57312ishccq4hwkb4wmh7f98is61kp483xh5sq4r5zqs2x";
     } {};
-    hlint = self.callCabal2nix "hlint" ./hlint-3.0.4 {};
+    hlint = self.callCabal2nix "hlint" ./hlint-3.1.1 {};
     hpc = self.callHackage "hpc" "0.6.0.3" { };
     patch = pkgs.haskell.lib.dontCheck super.patch;
     reflex = pkgs.haskell.lib.dontCheck super.reflex;
