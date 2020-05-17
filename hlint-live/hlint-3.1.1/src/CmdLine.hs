@@ -90,7 +90,7 @@ data ColorMode
 
 
 instance Default ColorMode where
-  def = if isWindows then Never else Auto
+  def = if System.FilePath.isWindows then Never else Auto
 
 
 data Cmd
