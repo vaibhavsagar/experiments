@@ -65,7 +65,9 @@ library
         extra >= 1.7.1,
         refact >= 0.3,
         aeson >= 1.1.2.0,
-        filepattern >= 0.1.1
+        filepattern >= 0.1.1,
+        HsYAML,
+        HsYAML-aeson
 
     if !flag(ghc-lib) && impl(ghc >= 8.10.0) && impl(ghc < 8.11.0)
       build-depends:

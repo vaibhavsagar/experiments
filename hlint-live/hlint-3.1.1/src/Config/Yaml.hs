@@ -8,7 +8,10 @@ module Config.Yaml(
     ) where
 
 import Config.Type
-import Data.Yaml
+import Data.YAML (Pos)
+import qualified Data.YAML.Aeson
+import Data.Aeson
+import Data.Aeson.Types (Parser)
 import Data.Either
 import Data.Maybe
 import Data.List.Extra
@@ -41,6 +44,16 @@ import GHC.Util (baseDynFlags, Scope,scopeCreate)
 import Language.Haskell.GhclibParserEx.GHC.Hs.ExtendInstances
 import Data.Char
 
+import qualified Data.ByteString.Lazy as BSL
+import qualified Data.ByteString as BSS
+
+decodeFileEither :: FilePath -> IO (Either (Pos, String) ConfigYaml)
+decodeFileEither path = do
+  contents <- BSS.readFile path
+  pure $ Data.YAML.Aeson.decode1Strict contents
+
+decodeEither' :: BSS.ByteString -> Either (Pos, String) ConfigYaml
+decodeEither' = Data.YAML.Aeson.decode1Strict
 
 -- | Read a config file in YAML format. Takes a filename, and optionally the contents.
 --   Fails if the YAML doesn't parse or isn't valid HLint YAML
@@ -50,7 +63,7 @@ readFileConfigYaml file contents = timedIO "Config" file $ do
         Nothing -> decodeFileEither file
         Just src -> pure $ decodeEither' $ BS.pack src
     case val of
-        Left e -> fail $ "Failed to read YAML configuration file " ++ file ++ "\n  " ++ displayException e
+        Left e -> fail $ "Failed to read YAML configuration file " ++ file ++ "\n  " ++ show e
         Right v -> pure v
 
 
@@ -101,7 +114,7 @@ parseFail (Val focus path) msg = fail $
     "Along path: " ++ unwords steps ++ "\n" ++
     "When at: " ++ fst (word1 $ show focus) ++ "\n" ++
     -- aim to show a smallish but relevant context
-    dotDot (fromMaybe (encode focus) $ listToMaybe $ dropWhile (\x -> BS.length x > 250) $ map encode contexts)
+    dotDot (fromMaybe (BSL.toStrict $ encode focus) $ listToMaybe $ dropWhile (\x -> BS.length x > 250) $ map (BSL.toStrict . encode) contexts)
     where
         (steps, contexts) = unzip $ reverse path
         dotDot x = let (a,b) = BS.splitAt 250 x in BS.unpack a ++ (if BS.null b then "" else "...")
