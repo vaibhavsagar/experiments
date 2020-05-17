@@ -7,6 +7,8 @@ let
   reflex-platform = fetcher (builtins.fromJSON (builtins.readFile ./versions.json)).reflex-platform;
 in (import reflex-platform { system = builtins.currentSystem; hieSupport = false; }).project ({ pkgs, ... }: {
   overrides = self: super: {
+    HsYAML = self.callHackage "HsYAML" "0.2.1.0" {};
+    HsYAML-aeson = pkgs.haskell.lib.doJailbreak (self.callHackage "HsYAML-aeson" "0.2.0.0" {});
     extra = self.callHackageDirect {
       pkg = "extra";
       ver = "1.7.1";
