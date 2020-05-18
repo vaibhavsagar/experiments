@@ -19,9 +19,11 @@ extra-source-files:  CHANGELOG.md
 
 executable hlint-live
   main-is:             Main.hs
-  -- other-modules:
+  other-modules:       HLintPath
   -- other-extensions:
   build-depends:       base >=4.12 && <4.13
+                     , file-embed
+                     , filepath
                      , hlint
                      , jsaddle
                      , reflex-dom
