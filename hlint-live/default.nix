@@ -14,7 +14,11 @@ in (import reflex-platform { system = builtins.currentSystem; hieSupport = false
       ver = "1.7.1";
       sha256 = "0n23dhsfjjdmprgmdsrrma8q8ys0zc4ab5vhzmiy2f9gkm0jg0pq";
     } {};
-    ghc-lib-parser = pkgs.haskell.lib.dontHaddock (self.callCabal2nix "ghc-lib-parser" ./ghc-lib-parser-8.10.1.20200412 {});
+    ghc-lib-parser = pkgs.haskell.lib.dontHaddock (self.callHackageDirect {
+      pkg = "ghc-lib-parser";
+      ver = "8.10.1.20200518";
+      sha256 = "0bidjvilvs9cq413ncwx9qi21y8ymw938mf0j4dwc4jv703q473p";
+    } {});
     ghc-lib-parser-ex = self.callHackageDirect {
       pkg = "ghc-lib-parser-ex";
       ver = "8.10.0.6";
