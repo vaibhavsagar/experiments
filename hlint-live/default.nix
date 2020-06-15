@@ -11,8 +11,8 @@ in (import reflex-platform { system = builtins.currentSystem; hieSupport = false
     HsYAML-aeson = pkgs.haskell.lib.doJailbreak (self.callHackage "HsYAML-aeson" "0.2.0.0" {});
     extra = self.callHackageDirect {
       pkg = "extra";
-      ver = "1.7.1";
-      sha256 = "0n23dhsfjjdmprgmdsrrma8q8ys0zc4ab5vhzmiy2f9gkm0jg0pq";
+      ver = "1.7.3";
+      sha256 = "08j4gg2n5cl7ycr943hmyfimgby0xhf5vp8nwrwflg6lrn1s388c";
     } {};
     ghc-lib-parser = pkgs.haskell.lib.dontHaddock (self.callHackageDirect {
       pkg = "ghc-lib-parser";
@@ -21,10 +21,23 @@ in (import reflex-platform { system = builtins.currentSystem; hieSupport = false
     } {});
     ghc-lib-parser-ex = self.callHackageDirect {
       pkg = "ghc-lib-parser-ex";
-      ver = "8.10.0.6";
-      sha256 = "043r3j57312ishccq4hwkb4wmh7f98is61kp483xh5sq4r5zqs2x";
+      ver = "8.10.0.14";
+      sha256 = "1asyai9pw977n2j28iy6jrlg874s7c0kci2kccg70nc8z401d77d";
     } {};
-    hlint = self.callCabal2nix "hlint" ./hlint-3.1.1 {};
+    hlint = pkgs.haskell.lib.overrideCabal (self.callCabal2nix "hlint" (pkgs.fetchFromGitHub {
+      owner = "ndmitchell";
+      repo = "hlint";
+      rev = "c522c198b7c4bccdb804295d9896ba35993b6a2e";
+      sha256 = "15lis8pphrq7kp5malwrsg4yyyy99iylf57wn5n5b0ijdm3906wd";
+    }) {}) (drv: {
+      configureFlags = (drv.configureFlags or []) ++ [ "-fhsyaml" ];
+      buildDepends = (drv.buildDepends or []) ++ [ self.HsYAML self.HsYAML-aeson ];
+      postPatch = (drv.postPatch or "") + ''
+        substituteInPlace src/CmdLine.hs --replace \
+          "import System.FilePath" \
+          "import System.FilePath hiding (isWindows)"
+      '';
+    });
     hpc = self.callHackage "hpc" "0.6.0.3" { };
     patch = pkgs.haskell.lib.dontCheck super.patch;
     reflex = pkgs.haskell.lib.dontCheck super.reflex;
