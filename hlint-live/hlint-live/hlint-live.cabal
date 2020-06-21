@@ -22,12 +22,16 @@ executable hlint-live
   other-modules:       HLintPath
   -- other-extensions:
   build-depends:       base >=4.12 && <4.13
+                     , aeson
                      , file-embed
                      , filepath
                      , hlint
                      , jsaddle
+                     , raw-strings-qq
                      , reflex-dom
                      , reflex
+                     , reflex-codemirror
+                     , reflex-utils
                      , text
   -- hs-source-dirs:
   default-language:    Haskell2010

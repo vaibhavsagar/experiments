@@ -27,7 +27,7 @@ in (import reflex-platform { system = builtins.currentSystem; hieSupport = false
     hlint = pkgs.haskell.lib.overrideCabal (self.callHackageDirect {
       pkg = "hlint";
       ver = "3.1.5";
-      sha256 = "sha256:04w2k1y25396vjy1hj4v74mzrfbmjpwnig0dh5sg1pv3mbf3nrq3";
+      sha256 = "04w2k1y25396vjy1hj4v74mzrfbmjpwnig0dh5sg1pv3mbf3nrq3";
     } {}) (drv: {
       configureFlags = (drv.configureFlags or []) ++ [ "-fhsyaml" ];
       buildDepends = (drv.buildDepends or []) ++ [ self.HsYAML self.HsYAML-aeson ];
@@ -41,6 +41,18 @@ in (import reflex-platform { system = builtins.currentSystem; hieSupport = false
     patch = pkgs.haskell.lib.dontCheck super.patch;
     reflex = pkgs.haskell.lib.dontCheck super.reflex;
     reflex-dom-core = pkgs.haskell.lib.dontCheck super.reflex-dom-core;
+    reflex-codemirror = self.callCabal2nix "reflex-codemirror" (pkgs.fetchFromGitHub {
+      owner = "Atidot";
+      repo = "reflex-codemirror";
+      rev = "bde5fbc5d33bf9a6a7f2f24c4f39f64a535b6489";
+      sha256 = "0zadvfng4h6lsw2vggzxlk7x5nra5g013krfbjwma6dmar7532s6";
+    }) {};
+    reflex-utils = self.callCabal2nix "reflex-utils" (pkgs.fetchFromGitHub {
+      owner = "Atidot";
+      repo = "reflex-utils";
+      rev = "9ffda7ef04c3d538fdf2ae8d6f3eddcd456de8ab";
+      sha256 = "1ljq6ny8abymkslwmlb7x45d1ngapd2zl1g1f8ifhpbb34qx12na";
+    }) {};
   };
   useWarp = true;
   withHoogle = false;

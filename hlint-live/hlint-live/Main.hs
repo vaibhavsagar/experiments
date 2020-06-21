@@ -1,7 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE MonoLocalBinds #-}
 
 import Reflex.Dom
 import Language.Haskell.HLint
@@ -12,10 +14,39 @@ import System.IO.Unsafe (unsafePerformIO)
 import Data.FileEmbed
 import HLintPath
 import Control.Monad (join, void)
+import Reflex.Utils
+import Reflex.CodeMirror
+import Text.RawString.QQ
+import qualified Data.Aeson as A
 
-main = mainWidget $ el "div" $ do
-    t  <- _textAreaElement_value <$> textAreaElement def
-    ideas <- performEvent $ ffor (updated t) $ \text -> liftIO $
+main :: IO ()
+main = mainWidget main_
+    where
+        main_ :: forall t m. MonadWidget t m => m ()
+        main_ = do
+            headD <- head_
+            whenLoaded [headD] blank body
+            return ()
+
+head_ :: forall t m. MonadWidget t m => m (Dynamic t Bool)
+head_ = do
+    s1Ds <- sequence [ script "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.54.0/codemirror.min.js"
+                     , css    "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.54.0/codemirror.min.css"
+                     ]
+    el "style" $ text [r|
+      .CodeMirror {
+        border: 1px solid black;
+      }
+    |]
+    whenLoaded s1Ds blank $ do
+        sequence [ script "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.54.0/mode/haskell/haskell.min.js"
+                 ]
+        return ()
+
+body :: MonadWidget t m => m ()
+body = el "div" $ do
+    t <- codemirror config never never
+    ideas <- performEvent $ ffor t $ \text -> liftIO $
         lint (T.unpack text)
     ideasDyn <- holdDyn [] ideas
     simpleList ideasDyn $ \ideaDyn -> do
@@ -23,6 +54,14 @@ main = mainWidget $ el "div" $ do
         ideaWidget idea
     el "div" $ do
         (dynText $ T.pack . displayLint <$> ideasDyn)
+    where
+        config :: Configuration
+        config
+            = def
+                { _configuration_theme = Just "default"
+                , _configuration_mode = Just $ A.String "haskell"
+                }
+
 
 displayLint :: [Idea] -> String
 displayLint ideas = unlines (map showIdea ideas)
