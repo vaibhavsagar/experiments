@@ -24,12 +24,11 @@ in (import reflex-platform { system = builtins.currentSystem; hieSupport = false
       ver = "8.10.0.14";
       sha256 = "1asyai9pw977n2j28iy6jrlg874s7c0kci2kccg70nc8z401d77d";
     } {};
-    hlint = pkgs.haskell.lib.overrideCabal (self.callCabal2nix "hlint" (pkgs.fetchFromGitHub {
-      owner = "ndmitchell";
-      repo = "hlint";
-      rev = "c522c198b7c4bccdb804295d9896ba35993b6a2e";
-      sha256 = "15lis8pphrq7kp5malwrsg4yyyy99iylf57wn5n5b0ijdm3906wd";
-    }) {}) (drv: {
+    hlint = pkgs.haskell.lib.overrideCabal (self.callHackageDirect {
+      pkg = "hlint";
+      ver = "3.1.5";
+      sha256 = "sha256:04w2k1y25396vjy1hj4v74mzrfbmjpwnig0dh5sg1pv3mbf3nrq3";
+    } {}) (drv: {
       configureFlags = (drv.configureFlags or []) ++ [ "-fhsyaml" ];
       buildDepends = (drv.buildDepends or []) ++ [ self.HsYAML self.HsYAML-aeson ];
       postPatch = (drv.postPatch or "") + ''
