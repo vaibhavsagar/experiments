@@ -1,0 +1,10 @@
+dist
+git-from-scratch/notebooks/solarized
+result
+*.ipynb
+.stack-work
+*.o
+*.hi
+*.dyn_o
+*.dyn_hi
+**/target/*
