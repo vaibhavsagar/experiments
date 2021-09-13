@@ -1,1 +1,1 @@
-FROM vaibhavsagar/ihaskell-nix:latest
+FROM vaibhavsagar/ihaskell-nix:1631555857
