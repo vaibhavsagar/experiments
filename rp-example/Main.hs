@@ -24,6 +24,7 @@ numberInput :: (DomBuilder t m, MonadFix m) => m (Dynamic t (Maybe Double))
 numberInput = do
   let initAttrs = ("type" =: "number") <> (style False)
       color error = if error then "red" else "green"
+      style :: Bool -> Map AttributeName Text
       style error = "style" =: ("border-color: " <> color error)
       styleChange :: Maybe Double -> Map AttributeName (Maybe Text)
       styleChange result = case result of

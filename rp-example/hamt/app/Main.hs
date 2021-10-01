@@ -58,6 +58,7 @@ valueInput :: (DomBuilder t m, MonadFix m) => Text -> m (Dynamic t String)
 valueInput placeholder = do
   let initAttrs = (attr "type" =: pack "string") <> (style False) <> (attr "placeholder" =: placeholder)
       color error = pack $ if error then "red" else "green"
+      style :: Bool -> Map AttributeName Text
       style error = attr "style" =: (pack "border-color: " <> color error)
       styleChange :: Maybe Double -> Map AttributeName (Maybe Text)
       styleChange result = case result of
