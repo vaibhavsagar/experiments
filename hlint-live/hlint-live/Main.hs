@@ -14,14 +14,13 @@ import System.IO.Unsafe (unsafePerformIO)
 import Data.FileEmbed
 import HLintPath
 import Control.Monad (join, void)
--- import Reflex.Utils
--- import Reflex.CodeMirror
 import Text.RawString.QQ
 import qualified Data.Aeson as A
 import Language.Javascript.JSaddle
 
 main :: IO ()
-main = mainWidgetWithHead head_ body
+main = do
+    mainWidgetWithHead head_ body
 
 head_ :: forall t m. MonadWidget t m => m ()
 head_ = do
@@ -38,11 +37,10 @@ head_ = do
 
 body :: MonadWidget t m => m ()
 body = el "div" $ do
-    t <- textAreaElement def
-    _ <- delay 1 =<< getPostBuild
-    cm <- liftJSM $ do
-        tElement <- toJSVal $ _element_raw $ _textAreaElement_element t
-        codemirror tElement
+    _ <- getPostBuild
+    tArea <- textAreaElement def
+    let tElement = _element_raw . _textAreaElement_element $ tArea
+    cm <- liftJSM $ codemirror =<< toJSVal tElement
     onChange <- setupValueListener cm
     ideas <- performEvent $ ffor onChange $ \text -> liftIO $
         lint (T.unpack text)

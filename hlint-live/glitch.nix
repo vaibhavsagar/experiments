@@ -13,21 +13,26 @@ let
       <!DOCTYPE html>
       <html>
         <head>
-          <script language="javascript" src="all.js"></script>
+          <script defer src="https://cdn.jsdelivr.net/combine/npm/codemirror@5.62.3,npm/codemirror@5.62.3/mode/haskell/haskell.min.js"></script>
+          <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.62.3/lib/codemirror.min.css">
+          <script defer language="javascript" src="all.js"></script>
         </head>
         <body>
         </body>
       </html>
     '';
   };
+  minifiedJs = pkgs.runCommand "all.js" {} ''
+    ${pkgs.closurecompiler}/bin/closure-compiler \
+      --externs=${project.ghcjs.hlint-live}/bin/hlint-live.jsexe/all.js.externs \
+      --jscomp_off=checkVars \
+      --js_output_file="$out" \
+      -O ADVANCED \
+      -W QUIET \
+      ${project.ghcjs.hlint-live}/bin/hlint-live.jsexe/all.js
+  '';
 in pkgs.runCommand "glitch" {} ''
   mkdir -p $out
   cp ${html} $out/index.html
-  ${pkgs.closurecompiler}/bin/closure-compiler \
-    --externs=${project.ghcjs.hlint-live}/bin/hlint-live.jsexe/all.js.externs \
-    --jscomp_off=checkVars \
-    --js_output_file="$out/all.js" \
-    -O ADVANCED \
-    -W QUIET \
-    ${project.ghcjs.hlint-live}/bin/hlint-live.jsexe/all.js
+  cp ${minifiedJs} $out/all.js
 ''
