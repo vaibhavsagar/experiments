@@ -14,39 +14,37 @@ import System.IO.Unsafe (unsafePerformIO)
 import Data.FileEmbed
 import HLintPath
 import Control.Monad (join, void)
-import Reflex.Utils
-import Reflex.CodeMirror
+-- import Reflex.Utils
+-- import Reflex.CodeMirror
 import Text.RawString.QQ
 import qualified Data.Aeson as A
+import Language.Javascript.JSaddle
 
 main :: IO ()
-main = mainWidget main_
-    where
-        main_ :: forall t m. MonadWidget t m => m ()
-        main_ = do
-            headD <- head_
-            whenLoaded [headD] blank body
-            return ()
+main = mainWidgetWithHead head_ body
 
-head_ :: forall t m. MonadWidget t m => m (Dynamic t Bool)
+head_ :: forall t m. MonadWidget t m => m ()
 head_ = do
-    s1Ds <- sequence [ script "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.54.0/codemirror.min.js"
-                     , css    "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.54.0/codemirror.min.css"
-                     ]
+    script "https://cdn.jsdelivr.net/combine/npm/codemirror@5.62.3,npm/codemirror@5.62.3/mode/haskell/haskell.min.js"
+    css    "https://cdn.jsdelivr.net/npm/codemirror@5.62.3/lib/codemirror.min.css"
     el "style" $ text [r|
       .CodeMirror {
         border: 1px solid black;
       }
     |]
-    whenLoaded s1Ds blank $ do
-        sequence [ script "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.54.0/mode/haskell/haskell.min.js"
-                 ]
-        return ()
+    where
+        script src = elAttr "script" ("type" =: "text/javascript" <> "src" =: src) blank
+        css src = elAttr "link" ("rel" =: "stylesheet" <> "type" =: "text/css" <> "href" =: src) blank
 
 body :: MonadWidget t m => m ()
 body = el "div" $ do
-    t <- codemirror config never never
-    ideas <- performEvent $ ffor t $ \text -> liftIO $
+    t <- textAreaElement def
+    _ <- delay 1 =<< getPostBuild
+    cm <- liftJSM $ do
+        tElement <- toJSVal $ _element_raw $ _textAreaElement_element t
+        codemirror tElement
+    onChange <- setupValueListener cm
+    ideas <- performEvent $ ffor onChange $ \text -> liftIO $
         lint (T.unpack text)
     ideasDyn <- holdDyn [] ideas
     simpleList ideasDyn $ \ideaDyn -> do
@@ -54,14 +52,32 @@ body = el "div" $ do
         ideaWidget idea
     el "div" $ do
         (dynText $ T.pack . displayLint <$> ideasDyn)
-    where
-        config :: Configuration
-        config
-            = def
-                { _configuration_theme = Just "default"
-                , _configuration_mode = Just $ A.String "haskell"
-                }
 
+t :: T.Text -> T.Text
+t = id
+
+getValueCM :: JSVal -> JSM T.Text
+getValueCM cm =
+    fromJSValUnchecked =<< (cm # (t "getValue") $ ([] :: [JSVal]))
+
+setupValueListener :: MonadWidget t m => JSVal -> m (Event t T.Text)
+setupValueListener codemirrorInstance = do
+  pb  <- getPostBuild
+  let act callback = liftJSM $ do
+        change <- toJSVal $ t "change"
+        jscb <- toJSVal <$> asyncFunction $ \_ _ _ -> do
+          getValueCM codemirrorInstance >>= liftIO . callback
+        void $ codemirrorInstance # (t "on") $ [change, jscb]
+  performEventAsync (act <$ pb)
+
+codemirror :: JSVal -> JSM JSVal
+codemirror element = do
+    cm <- jsg $ t "CodeMirror"
+    config <- toJSVal $ A.object
+        [ -- ("lineNumbers", A.Bool True)
+         ("mode", A.String "haskell")
+        ]
+    cm # (t "fromTextArea") $ [element, config]
 
 displayLint :: [Idea] -> String
 displayLint ideas = unlines (map showIdea ideas)
@@ -102,4 +118,3 @@ lint code = do
     case parsed of
         Left _ -> pure []
         Right mods -> pure $ applyHints classify hint [mods]
-
