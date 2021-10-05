@@ -1,9 +1,0 @@
-{
-  "reflex-platform": {
-    "owner": "reflex-frp",
-    "repo": "reflex-platform",
-    "branch": "develop",
-    "rev": "3dce5dc98ad3f63c83750069d9f8000166d26d27",
-    "sha256": "056nagwq8hm0mdy85687lyzpaxq6h4sasz0pv87khy988fnfkma9"
-  }
-}
