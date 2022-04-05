@@ -15,5 +15,6 @@ in (import reflex-platform { system = builtins.currentSystem; }).project ({ pkgs
   shells = {
     ghc = ["rp-example" "hamt"];
     ghcjs = ["rp-example" "hamt"];
+    ghcjs8_10 = ["rp-example" "hamt"];
   };
 })

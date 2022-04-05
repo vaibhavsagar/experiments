@@ -20,7 +20,7 @@ library
   exposed-modules:     HAMT
   -- other-modules:
   -- other-extensions:
-  build-depends:       base >=4.12 && <4.13
+  build-depends:       base >=4.12 && <5
                      , bytestring
                      , memory
                      , transformers
@@ -32,7 +32,7 @@ executable hamt
   main-is:             Main.hs
   -- other-modules:
   -- other-extensions:
-  build-depends:       base >=4.12 && <4.13
+  build-depends:       base >=4.12 && <5
                      , containers
                      , hamt
                      , jsaddle
