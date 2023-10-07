@@ -4,14 +4,14 @@ let
 
   inherit (nixpkgs) pkgs;
 
-  f = { mkDerivation, base, lib }:
+  f = { mkDerivation, base, lib, transformers }:
       mkDerivation {
         pname = "harimau";
         version = "0.1.0.0";
         src = ./.;
-        libraryHaskellDepends = [ base ];
+        libraryHaskellDepends = [ base transformers ];
         testHaskellDepends = [ base ];
-        license = lib.licenses.bsd3;
+        license = lib.licenses.mit;
       };
 
   haskellPackages = if compiler == "default"

@@ -74,6 +74,7 @@ library
 
     include-dirs:     cbits
     c-sources:        cbits/roaring.c
+    install-includes: cbits/roaring.h
 
 test-suite harimau-test
     -- Base language which the package is written in.
