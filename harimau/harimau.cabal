@@ -55,6 +55,7 @@ extra-source-files: cbits/roaring.h
 library
     -- Modules exported by the library.
     exposed-modules:  Harimau
+                   ,  Harimau.Bindings
 
     -- Modules included in this library but not exported.
     -- other-modules:
