@@ -23,6 +23,9 @@ foreign import ccall safe "roaring.h roaring_bitmap_from_range"
 foreign import ccall safe "roaring.h roaring_bitmap_of_ptr"
     c_roaring_bitmap_of_ptr :: CSize -> Ptr CUInt -> IO (Ptr RawRoaringBitmap)
 
+foreign import ccall safe "roaring.h roaring_bitmap_add_offset"
+    c_roaring_bitmap_add_offset :: Ptr RawRoaringBitmap -> CLong -> IO (Ptr RawRoaringBitmap)
+
 foreign import ccall safe "roaring.h roaring_bitmap_copy"
     c_roaring_bitmap_copy :: Ptr RawRoaringBitmap -> IO (Ptr RawRoaringBitmap)
 
@@ -145,6 +148,9 @@ foreign import ccall safe "roaring.h roaring_bitmap_shrink_to_fit"
 
 foreign import ccall safe "roaring.h roaring_bitmap_portable_deserialize"
     c_roaring_bitmap_portable_deserialize :: Ptr CChar -> IO (Ptr RawRoaringBitmap)
+
+foreign import ccall safe "roaring.h roaring_bitmap_portable_deserialize_safe"
+    c_roaring_bitmap_portable_deserialize_safe :: Ptr CChar -> CSize -> IO (Ptr RawRoaringBitmap)
 
 foreign import ccall safe "roaring.h roaring_bitmap_portable_size_in_bytes"
     c_roaring_bitmap_portable_size_in_bytes :: Ptr RawRoaringBitmap -> IO CSize

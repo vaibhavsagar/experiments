@@ -65,6 +65,7 @@ library
 
     -- Other library packages from which modules are imported.
     build-depends:    base >=4.16 && <4.17
+                    , bytestring
                     , transformers
 
     -- Directories containing source files.
