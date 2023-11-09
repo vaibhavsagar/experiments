@@ -1,11 +1,9 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-
 module Harimau where
 
-import Control.Monad.Trans.Cont (ContT (..))
 import Control.Monad.IO.Class (liftIO)
-import Data.ByteString (ByteString, packCStringLen, useAsCString, useAsCStringLen)
+import Control.Monad.Trans.Cont (ContT (..))
 import Data.Bits ()
+import Data.ByteString (ByteString, packCStringLen, useAsCString, useAsCStringLen)
 import Data.Coerce (coerce)
 import Data.Traversable (for)
 import Foreign
@@ -17,7 +15,7 @@ import System.IO.Unsafe (unsafePerformIO)
 
 import Harimau.Bindings
 
-newtype RoaringBitmap = RoaringBitmap { unRoaringBitmap :: ForeignPtr RawRoaringBitmap }
+newtype RoaringBitmap = RoaringBitmap {unRoaringBitmap :: ForeignPtr RawRoaringBitmap}
 
 instance Eq RoaringBitmap where
     a == b = unsafePerformIO $ roaringBitmapEquals a b
@@ -26,7 +24,7 @@ instance Bits RoaringBitmap where
     a .&. b = unsafePerformIO $ roaringBitmapAnd a b
     a .|. b = unsafePerformIO $ roaringBitmapOr a b
     xor a b = unsafePerformIO $ roaringBitmapXor a b
-    complement a = unsafePerformIO $ roaringBitmapXor a =<< roaringBitmapFromRange 0 (2^32) 1
+    complement a = unsafePerformIO $ roaringBitmapXor a =<< roaringBitmapFromRange 0 (2 ^ 32) 1
     shift a i = unsafePerformIO $ roaringBitmapAddOffset a (fromIntegral i)
     rotate a i = error "undefined"
     bitSize a = undefined
@@ -69,9 +67,8 @@ roaringBitmapCopy rbm =
         roaringBitmapFromRawPtr =<< c_roaring_bitmap_copy ptr
 
 roaringBitmapAnd :: RoaringBitmap -> RoaringBitmap -> IO RoaringBitmap
-roaringBitmapAnd =
-    with2RoaringBitmaps $
-        \ptr1 ptr2 -> roaringBitmapFromRawPtr =<< c_roaring_bitmap_and ptr1 ptr2
+roaringBitmapAnd = with2RoaringBitmaps $
+    \ptr1 ptr2 -> roaringBitmapFromRawPtr =<< c_roaring_bitmap_and ptr1 ptr2
 
 roaringBitmapAndCardinality :: RoaringBitmap -> RoaringBitmap -> IO Word64
 roaringBitmapAndCardinality = with2RoaringBitmaps $
@@ -257,8 +254,10 @@ roaringBitmapPortableDeserialize bs =
 
 roaringBitmapPortableDeserializeSafe :: ByteString -> IO RoaringBitmap
 roaringBitmapPortableDeserializeSafe bs =
-    roaringBitmapFromRawPtr =<< useAsCStringLen bs
-        (\(ptr, size) -> c_roaring_bitmap_portable_deserialize_safe ptr (fromIntegral size))
+    roaringBitmapFromRawPtr
+        =<< useAsCStringLen
+            bs
+            (\(ptr, size) -> c_roaring_bitmap_portable_deserialize_safe ptr (fromIntegral size))
 
 roaringBitmapPortableSizeInBytes :: RoaringBitmap -> IO Word64
 roaringBitmapPortableSizeInBytes rbm =
@@ -277,11 +276,58 @@ roaringBitmapEquals :: RoaringBitmap -> RoaringBitmap -> IO Bool
 roaringBitmapEquals = with2RoaringBitmaps $
     \ptr1 ptr2 -> toBool <$> c_roaring_bitmap_equals ptr1 ptr2
 
+roaringBitmapIsSubset :: RoaringBitmap -> RoaringBitmap -> IO Bool
+roaringBitmapIsSubset = with2RoaringBitmaps $
+    \ptr1 ptr2 -> toBool <$> c_roaring_bitmap_is_subset ptr1 ptr2
+
+roaringBitmapIsStrictSubset :: RoaringBitmap -> RoaringBitmap -> IO Bool
+roaringBitmapIsStrictSubset = with2RoaringBitmaps $
+    \ptr1 ptr2 -> toBool <$> c_roaring_bitmap_is_strict_subset ptr1 ptr2
+
+roaringBitmapFlip :: RoaringBitmap -> Word64 -> Word64 -> IO RoaringBitmap
+roaringBitmapFlip rbm rangeStart rangeEnd =
+    withForeignPtr (unRoaringBitmap rbm) $ \ptr ->
+        roaringBitmapFromRawPtr =<< c_roaring_bitmap_flip ptr (CULong rangeStart) (CULong rangeEnd)
+
+roaringBitmapFlipInplace :: RoaringBitmap -> Word64 -> Word64 -> IO ()
+roaringBitmapFlipInplace rbm rangeStart rangeEnd =
+    withForeignPtr (unRoaringBitmap rbm) $ \ptr ->
+        c_roaring_bitmap_flip_inplace ptr (CULong rangeStart) (CULong rangeEnd)
+
+roaringBitmapSelect :: RoaringBitmap -> Word32 -> IO (Maybe Word32)
+roaringBitmapSelect rbm rank =
+    withForeignPtr (unRoaringBitmap rbm) $ \ptr ->
+        alloca $ \element -> do
+            valid <- toBool <$> c_roaring_bitmap_select ptr (CUInt rank) element
+            if valid
+                then Just . coerce <$> peek element
+                else pure Nothing
+
+roaringBitmapRank :: RoaringBitmap -> Word32 -> IO Word64
+roaringBitmapRank rbm x =
+    withForeignPtr (unRoaringBitmap rbm) $ \ptr ->
+        coerce <$> c_roaring_bitmap_rank ptr (CUInt x)
+
+roaringBitmapGetIndex :: RoaringBitmap -> Word32 -> IO Int64
+roaringBitmapGetIndex rbm x =
+    withForeignPtr (unRoaringBitmap rbm) $ \ptr ->
+        coerce <$> c_roaring_bitmap_get_index ptr (CUInt x)
+
+roaringBitmapMinimum :: RoaringBitmap -> IO Word32
+roaringBitmapMinimum rbm =
+    withForeignPtr (unRoaringBitmap rbm) $ \ptr ->
+        coerce <$> c_roaring_bitmap_minimum ptr
+
+roaringBitmapMaximum :: RoaringBitmap -> IO Word32
+roaringBitmapMaximum rbm =
+    withForeignPtr (unRoaringBitmap rbm) $ \ptr ->
+        coerce <$> c_roaring_bitmap_maximum ptr
+
 someFunc :: IO ()
 someFunc = do
     rbmFromRange <- roaringBitmapFromRange 0 100 10
     print =<< roaringBitmapToUint32Array rbmFromRange
-    rbmOfPtr <- roaringBitmapOfPtr [0..20]
+    rbmOfPtr <- roaringBitmapOfPtr [0 .. 20]
     print =<< roaringBitmapToUint32Array rbmOfPtr
     intersect <- roaringBitmapAnd rbmFromRange rbmOfPtr
     print =<< roaringBitmapToUint32Array intersect
@@ -289,8 +335,8 @@ someFunc = do
     print =<< roaringBitmapToUint32Array union
     roaringBitmapAndInplace rbmFromRange rbmOfPtr
     print =<< roaringBitmapToUint32Array rbmFromRange
-    rbmFull <- roaringBitmapFromRange 0 (2^32) 1
-    rbmAlmostFull <- roaringBitmapFromRange 1 (2^33) 1
+    rbmFull <- roaringBitmapFromRange 0 (2 ^ 32) 1
+    rbmAlmostFull <- roaringBitmapFromRange 1 (2 ^ 33) 1
     diff <- roaringBitmapXor rbmFull rbmAlmostFull
     print =<< roaringBitmapToUint32Array diff
     serialised <- roaringBitmapPortableSerialize union
