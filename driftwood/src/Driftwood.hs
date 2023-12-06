@@ -1,253 +1,72 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Driftwood where
 
-import qualified Data.ByteString as B
 import Data.Aeson
-import Data.Monoid
+import Data.IORef
+import Data.Maybe (fromJust)
+import qualified Data.Text as T
 import GHC.Generics
-import Data.Char (toLower)
+import qualified Data.Aeson.KeyMap as KM
+import qualified Data.ByteString.Char8 as BC
+import qualified Data.ByteString.Lazy as BL
+import qualified System.IO as IO
 
 data Message = Message
-    { messageSrc  :: String
-    , messageDest :: String
-    , messageBody :: Body
-    } deriving (Generic, Show, Eq)
+    { src :: String
+    , dest :: String
+    , body :: Object
+    } deriving (Eq, Show, Generic, FromJSON, ToJSON)
 
-instance FromJSON Message where
-    parseJSON = withObject "Message" $ \v -> Message
-        <$> v .: "src"
-        <*> v .: "dest"
-        <*> v .: "body"
+data InternalState = InternalState
+    { internalStateNodeId :: String
+    , internalStateMsgCounter :: Int
+    } deriving (Eq, Show)
 
-instance ToJSON Message where
-    toJSON (Message src dest body)
-        = object
-        [ "src" .= src
-        , "dest" .= dest
-        , "body" .= body
-        ]
-
-    toEncoding (Message src dest body)
-        = pairs
-        (  "src"  .= src
-        <> "dest" .= dest
-        <> "body" .= body
-        )
-
-data Body
-    = RaftInit RaftInitBody
-    | RaftInitOk Reply
-    | MError ErrorBody
-    | Write WriteBody
-    | WriteOk Reply
-    | Read Request
-    | ReadOk ReadReply
-    | Cas CasBody
-    | CasOk Reply
-    | Delete Request
-    | DeleteOk Reply
-    deriving (Generic, Show, Eq)
-
-instance FromJSON Body where
-    parseJSON = withObject "Body" $ \v -> v .: "type" >>= \t ->
-        case (t :: String) of
-            "raft_init" -> fmap RaftInit $ RaftInitBody
-                <$> v .: "msg_id"
-                <*> v .: "node_id"
-                <*> v .: "node_ids"
-            "raft_init_ok" -> fmap RaftInitOk $ Reply
-                <$> v .: "in_reply_to"
-            "error" -> fmap MError $ ErrorBody
-                <$> v .:? "code"
-                <*> v .:? "text"
-                <*> v .:  "in_reply_to"
-            "write" -> fmap Write $ WriteBody
-                <$> v .: "msg_id"
-                <*> v .: "key"
-                <*> v .: "value"
-            "write_ok" -> fmap WriteOk $ Reply
-                <$> v .: "in_reply_to"
-            "read" -> fmap Read $ Request
-                <$> v .: "msg_id"
-                <*> v .: "key"
-            "read_ok" -> fmap ReadOk $ ReadReply
-                <$> v .: "in_reply_to"
-                <*> v .: "value"
-            "cas" -> fmap Cas $ CasBody
-                <$> v .: "msg_id"
-                <*> v .: "key"
-                <*> v .: "from"
-                <*> v .: "to"
-            "cas_ok" -> fmap CasOk $ Reply
-                <$> v .: "in_reply_to"
-            "delete" -> fmap Delete $ Request
-                <$> v .: "msg_id"
-                <*> v .: "key"
-            "delete_ok" -> fmap DeleteOk $ Reply
-                <$> v .: "in_reply_to"
-
-instance ToJSON Body where
-    toJSON body = case body of
-        RaftInit (RaftInitBody msg_id node_id node_ids) -> object
-            [ "type"     .= String "raft_init"
-            , "msg_id"   .= msg_id
-            , "node_id"  .= node_id
-            , "node_ids" .= node_ids
-            ]
-        RaftInitOk (Reply in_reply_to) -> object
-            [ "type"        .= String "raft_init_ok"
-            , "in_reply_to" .= in_reply_to
-            ]
-        MError (ErrorBody code text in_reply_to) -> object
-            [ "type"        .= String "error"
-            , "code"        .= code
-            , "text"        .= text
-            , "in_reply_to" .= in_reply_to
-            ]
-        Write (WriteBody msg_id key value) -> object
-            [ "type"   .= String "write"
-            , "msg_id" .= msg_id
-            , "key"    .= key
-            , "value"  .= value
-            ]
-        WriteOk (Reply in_reply_to) -> object
-            [ "type"        .= String "write_ok"
-            , "in_reply_to" .= in_reply_to
-            ]
-        Read (Request msg_id key) -> object
-            [ "type"   .= String "read"
-            , "msg_id" .= msg_id
-            , "key"    .= key
-            ]
-        ReadOk (ReadReply in_reply_to value) -> object
-            [ "type"        .= String "read_ok"
-            , "in_reply_to" .= in_reply_to
-            , "value"       .= value
-            ]
-        Cas (CasBody msg_id key from to) -> object
-            [ "type"   .= String "cas"
-            , "msg_id" .= msg_id
-            , "key"    .= key
-            , "from"   .= from
-            , "to"     .= to
-            ]
-        CasOk (Reply in_reply_to) -> object
-            [ "type"        .= String "cas_ok"
-            , "in_reply_to" .= in_reply_to
-            ]
-        Delete (Request msg_id key) -> object
-            [ "type"   .= String "delete"
-            , "msg_id" .= msg_id
-            , "key"    .= key
-            ]
-        DeleteOk (Reply in_reply_to) -> object
-            [ "type"        .= String "delete_ok"
-            , "in_reply_to" .= in_reply_to
-            ]
-
-    toEncoding body = case body of
-        RaftInit (RaftInitBody msg_id node_id node_ids) -> pairs
-            (  "type"     .= String "raft_init"
-            <> "msg_id"   .= msg_id
-            <> "node_id"  .= node_id
-            <> "node_ids" .= node_ids
-            )
-        RaftInitOk (Reply in_reply_to) -> pairs
-            (  "type"        .= String "raft_init_ok"
-            <> "in_reply_to" .= in_reply_to
-            )
-        MError (ErrorBody code text in_reply_to) -> pairs
-            (  "type"        .= String "error"
-            <> "code"        .= code
-            <> "text"        .= text
-            <> "in_reply_to" .= in_reply_to
-            )
-        Write (WriteBody msg_id key value) -> pairs
-            (  "type"   .= String "write"
-            <> "msg_id" .= msg_id
-            <> "key"    .= key
-            <> "value"  .= value
-            )
-        WriteOk (Reply in_reply_to) -> pairs
-            (  "type"        .= String "write_ok"
-            <> "in_reply_to" .= in_reply_to
-            )
-        Read (Request msg_id key) -> pairs
-            (  "type"   .= String "read"
-            <> "msg_id" .= msg_id
-            <> "key"    .= key
-            )
-        ReadOk (ReadReply in_reply_to value) -> pairs
-            (  "type"        .= String "read_ok"
-            <> "in_reply_to" .= in_reply_to
-            <> "value"       .= value
-            )
-        Cas (CasBody msg_id key from to) -> pairs
-            (  "type"   .= String "cas"
-            <> "msg_id" .= msg_id
-            <> "key"    .= key
-            <> "from"   .= from
-            <> "to"     .= to
-            )
-        CasOk (Reply in_reply_to) -> pairs
-            (  "type"        .= String "cas_ok"
-            <> "in_reply_to" .= in_reply_to
-            )
-        Delete (Request msg_id key) -> pairs
-            (  "type"   .= String "delete"
-            <> "msg_id" .= msg_id
-            <> "key"    .= key
-            )
-        DeleteOk (Reply in_reply_to) -> pairs
-            (  "type"        .= String "delete_ok"
-            <> "in_reply_to" .= in_reply_to
-            )
-
-data RaftInitBody
-    = RaftInitBody
-    { raftInitMsgId   :: Int
-    , raftInitNodeId  :: Int
-    , raftInitNodeIds :: [Int]
-    } deriving (Generic, Show, Eq)
-
-data Reply = Reply { replyInReplyTo :: Int } deriving (Generic, Show, Eq)
-
-data Request
-    = Request
-    { requestMsgId :: Int
-    , requestKey   :: String
-    } deriving (Generic, Show, Eq)
-
-data ErrorBody
-    = ErrorBody
-    { errorCode      :: Maybe Int
-    , errorText      :: Maybe String
-    , errorInReplyTo :: Int
-    } deriving (Generic, Show, Eq)
-
-data WriteBody
-    = WriteBody
-    { writeMsgId :: Int
-    , writeKey   :: String
-    , writeValue :: String
-    } deriving (Generic, Show, Eq)
-
-data ReadReply
-    = ReadReply
-    { readInReplyTo :: Int
-    , readValue :: String
-    } deriving (Generic, Show, Eq)
-
-data CasBody
-    = CasBody
-    { casMsgId :: Int
-    , casKey   :: String
-    , casFrom  :: String
-    , casTo    :: String
-    } deriving (Generic, Show, Eq)
-
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+driftwood :: IO ()
+driftwood = do
+    state <- newIORef $ InternalState "" 0
+    go state
+    where
+        go :: IORef InternalState -> IO ()
+        go state = do
+            parsed :: Maybe Message <- decodeStrict' <$> BC.getLine
+            case parsed of
+                Just msg -> do
+                    IO.hPutStrLn IO.stderr $ "Received: " ++ show msg
+                    case KM.lookup "type" (body msg) of
+                        Just "init" -> case KM.lookup "node_id" (body msg) of
+                            Just (String node_id) -> do
+                                IO.hPutStrLn IO.stderr $ "Initialised node " ++ show node_id
+                                _ <- atomicModifyIORef state $ \internalState ->
+                                    (InternalState (T.unpack node_id) (internalStateMsgCounter internalState), ())
+                                response <- reply state msg $ KM.insert "type" (String "init_ok") KM.empty
+                                BL.putStr $ encode response
+                                BL.putStr "\n"
+                                IO.hFlush IO.stdout
+                            Nothing -> error "node id not found"
+                        Just "echo" -> do
+                            IO.hPutStrLn IO.stderr $ "Echoing " ++ show (body msg)
+                            response <- reply state msg $ KM.insert "type" (String "echo_ok") (body msg)
+                            BL.putStr $ encode response
+                            BL.putStr "\n"
+                            IO.hFlush IO.stdout
+                        _ -> error "did not understand message"
+                    go state
+                Nothing -> error "failed"
+        reply :: IORef InternalState -> Message -> Object -> IO Message
+        reply state request baseBody = do
+            (msgId, nodeId) <- atomicModifyIORef state $ \internalState -> let
+                counter' = internalStateMsgCounter internalState + 1
+                internalState' = InternalState (internalStateNodeId internalState) counter'
+                in (internalState', (counter', internalStateNodeId internalState))
+            let responseBody =
+                    KM.insert "msg_id" (Number (fromIntegral msgId)) $
+                    KM.insert "in_reply_to" (fromJust $ KM.lookup "msg_id" (body request)) $
+                    baseBody
+            let message = Message (dest request) (src request) responseBody
+            pure message
