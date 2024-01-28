@@ -1,0 +1,17 @@
+cabal-version:      1.24
+name:               opentelemetry-plugin-bug
+version:            0.1.0.0
+license:            BSD3
+license-file:       LICENSE
+author:             Vaibhav Sagar
+maintainer:         vaibhavsagar@gmail.com
+category:           Development
+build-type:         Simple
+
+library
+    ghc-options:      -fplugin OpenTelemetry.Plugin
+    exposed-modules:  MyLib
+    build-depends:    base >=4.17 && <5
+                    , opentelemetry-plugin -any
+    hs-source-dirs:   .
+    default-language: Haskell2010
