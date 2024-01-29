@@ -30,21 +30,6 @@
         "type": "github"
       }
     },
-    "nix-filter": {
-      "locked": {
-        "lastModified": 1705332318,
-        "narHash": "sha256-kcw1yFeJe9N4PjQji9ZeX47jg0p9A0DuU4djKvg1a7I=",
-        "owner": "numtide",
-        "repo": "nix-filter",
-        "rev": "3449dc925982ad46246cfc36469baf66e1b64f17",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "nix-filter",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1685566663,
@@ -63,11 +48,11 @@
     },
     "nixpkgs-src": {
       "locked": {
-        "lastModified": 1706277648,
-        "narHash": "sha256-nAgfpzx8CjBoEpCVFv4yot/WvV2/ehPeN+YGE84Ne2c=",
+        "lastModified": 1706494836,
+        "narHash": "sha256-uP9Sl2MRDIg3ew1pOUujpcQdyZvbSseLwLjGaptcu0g=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d89ce13feba20b510e396349b3c449ed6c375a2f",
+        "rev": "da33deae34a869896c1dfd052608f9001cfb73a5",
         "type": "github"
       },
       "original": {
@@ -100,7 +85,6 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nix-filter": "nix-filter",
         "nixpkgs-src": "nixpkgs-src",
         "opentelemetry-plugin-src": "opentelemetry-plugin-src"
       }
