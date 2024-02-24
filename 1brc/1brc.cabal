@@ -1,0 +1,40 @@
+cabal-version: 2.4
+name: 1brc
+version: 0.1.0.0
+-- synopsis:
+-- description:
+license: BSD-3-Clause
+license-file: LICENSE
+author: Vaibhav Sagar
+maintainer: vaibhavsagar@gmail.com
+-- copyright:
+category: Data
+build-type: Simple
+
+-- extra-source-files:
+common warnings
+  ghc-options: -Wall
+
+library
+  import: warnings
+  -- cabal-gild: discover src
+  exposed-modules: OneBRC
+  -- other-modules:
+  -- other-extensions:
+  build-depends:
+    base >=4.7 && <5,
+    bytestring,
+    containers,
+    transformers,
+
+  hs-source-dirs: src
+  default-language: Haskell2010
+
+executable 1brc
+  import: warnings
+  main-is: Main.hs
+  -- other-modules:
+  -- other-extensions:
+  build-depends: base >=4.7 && <5
+  hs-source-dirs: app
+  default-language: Haskell2010
