@@ -1,9 +1,10 @@
 module Main where
 
 import Control.Monad (when)
+import qualified Data.Text.IO.Utf8 as TIO
+import Data.Text.Encoding (decodeUtf8)
+import qualified Data.ByteString as B
 import System.Environment
-
-import Debug.Trace
 
 import OneBRC
 
@@ -12,14 +13,8 @@ main = do
     args <- getArgs
     when (length args < 1) $ error "no filename provided"
     let filename = head args
-    contents <- readFile filename
-    traceIO $ "read contents"
+    contents <- decodeUtf8 <$> B.readFile filename
     let processed = processAll contents
-    traceIO $ "processed contents"
-    let calculated = calculateAll processed
-    traceIO $ "calculated contents"
-    let formatted = formatMap calculated
-    traceIO $ "formatted contents"
+    let formatted = formatMap processed
     let output = formatOutput formatted
-    traceIO $ "formatted output"
-    putStrLn output
+    TIO.putStrLn output
