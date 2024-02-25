@@ -7,6 +7,7 @@ module OneBRC
     ) where
 
 import GHC.Conc (par)
+import Data.Char (digitToInt)
 import Data.Map.Strict (Map)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BC
@@ -15,7 +16,6 @@ import Data.List (foldl')
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (decodeUtf8)
-import Data.Text.Read
 import Text.Printf
 
 data Measure = Measure
@@ -39,13 +39,23 @@ mergeMeasurementMap = Map.unionWith mergeMeasure
 formatMeasure :: Measure -> Text
 formatMeasure m = T.pack $ printf "%.1f/%.1f/%.1f" (measureMin m) (measureSum m / (fromIntegral (measureCount m))) (measureMax m)
 
+parseTemp :: BS.ByteString -> Double
+parseTemp bs = case BC.head bs of
+    '-' -> -1 * parseTemp (BC.tail bs)
+    c0 -> case BC.head (BC.tail bs) of
+        '.' -> let
+            c1 = BC.head . BC.tail $ BC.tail bs
+            in (fromIntegral $ d2i c0) + ((fromIntegral $ d2i c1) / 10)
+        c1 -> let
+            c2 = BC.head . BC.tail . BC.tail $ BC.tail bs
+            in (fromIntegral ((d2i c0 * 10) + d2i c1)) + ((fromIntegral $ d2i c2) / 10)
+    where d2i = digitToInt
+
 parseLine :: BS.ByteString -> (BS.ByteString, Measure)
 parseLine line = let
     [name, rest] = BS.split (fromIntegral $ fromEnum ';') line
-    measurement = signed double $ decodeUtf8 rest
-    in case measurement of
-        Left err -> error err
-        Right (m, _) -> (name, Measure m m m 1)
+    m = parseTemp rest
+    in (name, Measure m m m 1)
 
 mergeMeasure :: Measure -> Measure -> Measure
 mergeMeasure mA mB = Measure
