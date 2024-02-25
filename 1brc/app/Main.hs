@@ -14,8 +14,7 @@ main = do
     when (length args < 2) $ error "no chunkSize and filename provided"
     let chunkSize = read (head args) :: Int
     let filename = head (tail args)
-    contents <- decodeUtf8 <$> B.readFile filename
+    contents <- B.readFile filename
     let processed = processAll chunkSize contents
-    let formatted = formatMap processed
-    let output = formatOutput formatted
+    let output = formatOutput processed
     TIO.putStrLn output
