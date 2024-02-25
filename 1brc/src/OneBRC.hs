@@ -40,14 +40,14 @@ formatMeasure :: Measure -> Text
 formatMeasure m = T.pack $ printf "%.1f/%.1f/%.1f" (measureMin m) (measureSum m / (fromIntegral (measureCount m))) (measureMax m)
 
 parseTemp :: BS.ByteString -> Double
-parseTemp bs = case BC.head bs of
-    '-' -> -1 * parseTemp (BC.tail bs)
-    c0 -> case BC.head (BC.tail bs) of
+parseTemp bs = case BC.index bs 0 of
+    '-' -> negate $ parseTemp (BC.tail bs)
+    c0 -> case BC.index bs 1 of
         '.' -> let
-            c1 = BC.head . BC.tail $ BC.tail bs
+            c1 = BC.index bs 2
             in (fromIntegral $ d2i c0) + ((fromIntegral $ d2i c1) / 10)
         c1 -> let
-            c2 = BC.head . BC.tail . BC.tail $ BC.tail bs
+            c2 = BC.index bs 3
             in (fromIntegral ((d2i c0 * 10) + d2i c1)) + ((fromIntegral $ d2i c2) / 10)
     where d2i = digitToInt
 
