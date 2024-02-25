@@ -6,24 +6,24 @@ module OneBRC
     , formatOutput
     ) where
 
+import Control.Monad (foldM)
+import Control.Monad.ST
 import GHC.Conc (par)
+import Data.Array (Array)
+import Data.Array.MArray (freeze)
 import Data.Char (digitToInt)
-import Data.Map.Strict (Map)
+import Data.Maybe (fromJust)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BC
+import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
-import Data.List (foldl')
+import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (decodeUtf8)
 import Text.Printf
 
-data Measure = Measure
-    { measureMin :: !Double
-    , measureMax :: !Double
-    , measureSum :: !Double
-    , measureCount :: !Int
-    } deriving (Eq, Show)
+import Hashtable as HT
 
 foldParallel :: Int -> ([a] -> b) -> (b -> b -> b) -> [a] -> b
 foldParallel _ fold _ [] = fold []
@@ -65,23 +65,21 @@ mergeMeasure mA mB = Measure
     , measureCount = measureCount mA + measureCount mB
     }
 
-insertLine :: Map.Map BS.ByteString Measure -> BS.ByteString -> Map.Map BS.ByteString Measure
-insertLine measurements line = let
-    (name, measure) = {-# SCC parseLine #-} parseLine line
-    measurements' = {-# SCC insertMeasurement #-} Map.insertWith mergeMeasure name measure measurements
-    in measurements'
+processAll :: Int -> BS.ByteString -> (Set.Set BS.ByteString, Array Int (HT.Element Measure))
+processAll _chunkSize fileContents = runST $ do
+    let input = map parseLine $ BC.lines fileContents
+    ht <- HT.new
+    (htFinal, setFinal) <- foldM step (ht,Set.empty) input
+    frozen <- freeze htFinal
+    pure (setFinal, frozen)
+    where
+        step (ht,set) (key,measure) = do
+            HT.insertWith mergeMeasure (Pair key measure) ht
+            pure (ht, Set.insert key set)
 
-processAll :: Int -> BS.ByteString -> Map.Map BS.ByteString Measure
-processAll _chunkSize fileContents =  foldl' insertLine Map.empty $ BC.lines fileContents
-    -- foldParallel
-    --     chunkSize
-    --     (foldl' insertLine Map.empty)
-    --     mergeMeasurementMap
-    --     (T.lines fileContents)
-
-formatOutput :: Map.Map BS.ByteString Measure -> Text
-formatOutput formattedMap = let
-    pairs = Map.toAscList formattedMap
-    equals = map (\(k,v) -> T.concat [decodeUtf8 k, "=", formatMeasure v]) pairs
+formatOutput :: (Set.Set BS.ByteString, Array Int (HT.Element Measure)) -> Text
+formatOutput (set, ht) = let
+    names = Set.toAscList set
+    equals = map (\name -> T.concat [decodeUtf8 name, "=", formatMeasure (pairValue $ fromJust $ HT.lookup name ht)]) names
     commas = T.intercalate ", " equals
     in T.concat ["{", commas, "}"]
