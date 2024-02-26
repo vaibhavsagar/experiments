@@ -17,7 +17,7 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BC
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
-import qualified Data.Set as Set
+-- import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (decodeUtf8)
@@ -53,8 +53,8 @@ parseTemp bs = case BC.index bs 0 of
 
 parseLine :: BS.ByteString -> (BS.ByteString, Measure)
 parseLine line = let
-    [name, rest] = BS.split (fromIntegral $ fromEnum ';') line
-    m = parseTemp rest
+    (name, rest) = BS.break (==(fromIntegral $ fromEnum ';')) line
+    m = parseTemp $ BS.tail rest
     in (name, Measure m m m 1)
 
 mergeMeasure :: Measure -> Measure -> Measure
@@ -65,21 +65,22 @@ mergeMeasure mA mB = Measure
     , measureCount = measureCount mA + measureCount mB
     }
 
-processAll :: Int -> BS.ByteString -> (Set.Set BS.ByteString, Array Int (HT.Element Measure))
-processAll _chunkSize fileContents = runST $ do
-    let input = map parseLine $ BC.lines fileContents
-    ht <- HT.new
-    (htFinal, setFinal) <- foldM step (ht,Set.empty) input
-    frozen <- freeze htFinal
-    pure (setFinal, frozen)
-    where
-        step (ht,set) (key,measure) = do
-            HT.insertWith mergeMeasure (Pair key measure) ht
-            pure (ht, Set.insert key set)
+processAll :: Int -> BS.ByteString -> Map.Map BS.ByteString Measure
+processAll _chunkSize fileContents = Map.fromListWith mergeMeasure $ map parseLine $ BC.lines fileContents
+    -- runST $ do
+    -- let input = map parseLine $ BC.lines fileContents
+    -- ht <- HT.new
+    -- (htFinal, setFinal) <- foldM step (ht,Set.empty) input
+    -- frozen <- freeze htFinal
+    -- pure (setFinal, frozen)
+    -- where
+    --     step (ht,set) (key,measure) = do
+    --         HT.insertWith mergeMeasure (Pair key measure) ht
+    --         pure (ht, Set.insert key set)
 
-formatOutput :: (Set.Set BS.ByteString, Array Int (HT.Element Measure)) -> Text
-formatOutput (set, ht) = let
-    names = Set.toAscList set
-    equals = map (\name -> T.concat [decodeUtf8 name, "=", formatMeasure (pairValue $ fromJust $ HT.lookup name ht)]) names
+formatOutput :: Map.Map BS.ByteString Measure -> Text
+formatOutput measurements = let
+    pairs = Map.toAscList measurements
+    equals = map (\(k,v) -> T.concat [decodeUtf8 k, "=", formatMeasure v]) pairs
     commas = T.intercalate ", " equals
     in T.concat ["{", commas, "}"]
