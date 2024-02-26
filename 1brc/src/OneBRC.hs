@@ -6,16 +6,15 @@ module OneBRC
     , formatOutput
     ) where
 
-import Control.Monad (foldM)
-import Control.Monad.ST
-import GHC.Conc (par)
-import Data.Array (Array)
-import Data.Array.MArray (freeze)
+-- import Control.Monad (foldM)
+-- import Control.Monad.ST
+-- import GHC.Conc (par)
+-- import Data.Array (Array)
+-- import Data.Array.MArray (freeze)
 import Data.Char (digitToInt)
-import Data.Maybe (fromJust)
+-- import Data.Maybe (fromJust)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BC
-import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 -- import qualified Data.Set as Set
 import Data.Text (Text)
@@ -23,7 +22,7 @@ import qualified Data.Text as T
 import Data.Text.Encoding (decodeUtf8)
 import Text.Printf
 
-import Hashtable as HT
+-- import Hashtable as HT
 
 data Measure = Measure
     { measureMin :: !Double
@@ -32,20 +31,21 @@ data Measure = Measure
     , measureCount :: !Int
     } deriving (Eq, Show)
 
-foldParallel :: Int -> ([a] -> b) -> (b -> b -> b) -> [a] -> b
-foldParallel _ fold _ [] = fold []
-foldParallel chunkSize fold combine xs = par lf $ combine lf rf
-    where
-        (left, right) = splitAt chunkSize xs
-        lf = fold left
-        rf = foldParallel chunkSize fold combine right
+-- foldParallel :: Int -> ([a] -> b) -> (b -> b -> b) -> [a] -> b
+-- foldParallel _ fold _ [] = fold []
+-- foldParallel chunkSize fold combine xs = par lf $ combine lf rf
+--     where
+--         (left, right) = splitAt chunkSize xs
+--         lf = fold left
+--         rf = foldParallel chunkSize fold combine right
 
-mergeMeasurementMap :: Map Text Measure -> Map Text Measure -> Map Text Measure
-mergeMeasurementMap = Map.unionWith mergeMeasure
+-- mergeMeasurementMap :: Map Text Measure -> Map Text Measure -> Map Text Measure
+-- mergeMeasurementMap = Map.unionWith mergeMeasure
 
 formatMeasure :: Measure -> Text
 formatMeasure m = T.pack $ printf "%.1f/%.1f/%.1f" (measureMin m) (measureSum m / (fromIntegral (measureCount m))) (measureMax m)
 
+{-# SCC parseTemp #-}
 parseTemp :: BS.ByteString -> Double
 parseTemp bs = case BC.index bs 0 of
     '-' -> negate $ parseTemp (BC.tail bs)
@@ -58,12 +58,14 @@ parseTemp bs = case BC.index bs 0 of
             in (fromIntegral ((d2i c0 * 10) + d2i c1)) + ((fromIntegral $ d2i c2) / 10)
     where d2i = digitToInt
 
+{-# SCC parseLine #-}
 parseLine :: BS.ByteString -> (BS.ByteString, Measure)
 parseLine line = let
     (name, rest) = BS.break (==(fromIntegral $ fromEnum ';')) line
     m = parseTemp $ BS.tail rest
     in (name, Measure m m m 1)
 
+{-# SCC mergeMeasure #-}
 mergeMeasure :: Measure -> Measure -> Measure
 mergeMeasure mA mB = Measure
     { measureMin = min (measureMin mA) (measureMin mB)
