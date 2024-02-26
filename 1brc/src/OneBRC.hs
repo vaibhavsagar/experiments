@@ -25,6 +25,13 @@ import Text.Printf
 
 import Hashtable as HT
 
+data Measure = Measure
+    { measureMin :: !Double
+    , measureMax :: !Double
+    , measureSum :: !Double
+    , measureCount :: !Int
+    } deriving (Eq, Show)
+
 foldParallel :: Int -> ([a] -> b) -> (b -> b -> b) -> [a] -> b
 foldParallel _ fold _ [] = fold []
 foldParallel chunkSize fold combine xs = par lf $ combine lf rf

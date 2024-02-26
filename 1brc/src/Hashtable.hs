@@ -12,13 +12,6 @@ import Data.Bits
 import qualified Data.List as List
 import qualified Data.ByteString as BS
 
-data Measure = Measure
-    { measureMin :: !Double
-    , measureMax :: !Double
-    , measureSum :: !Double
-    , measureCount :: !Int
-    } deriving (Eq, Show)
-
 data Pair a = Pair
     { pairKey :: !BS.ByteString
     , pairValue :: !a
