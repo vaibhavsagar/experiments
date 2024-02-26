@@ -1,28 +1,29 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RankNTypes #-}
 
 module OneBRC
     ( processAll
     , formatOutput
     ) where
 
--- import Control.Monad (foldM)
--- import Control.Monad.ST
+import Control.Monad (foldM)
+import Control.Monad.ST
 -- import GHC.Conc (par)
--- import Data.Array (Array)
--- import Data.Array.MArray (freeze)
+import Data.Array (Array)
+import Data.Array.MArray (freeze)
+import Data.Array.ST (STArray)
 import Data.Char (digitToInt)
--- import Data.Maybe (fromJust)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BC
 import qualified Data.Map.Strict as Map
--- import qualified Data.Set as Set
+import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
 import Data.Text.Encoding (decodeUtf8)
 import Text.Printf
 
--- import Hashtable as HT
+import Hashtable as HT
 
 data Measure = Measure
     { measureMin :: !Double
@@ -74,22 +75,25 @@ mergeMeasure mA mB = Measure
     , measureCount = measureCount mA + measureCount mB
     }
 
-processAll :: Int -> BS.ByteString -> Map.Map BS.ByteString Measure
-processAll _chunkSize fileContents = Map.fromListWith mergeMeasure $ map parseLine $ BC.lines fileContents
-    -- runST $ do
-    -- let input = map parseLine $ BC.lines fileContents
-    -- ht <- HT.new
-    -- (htFinal, setFinal) <- foldM step (ht,Set.empty) input
-    -- frozen <- freeze htFinal
-    -- pure (setFinal, frozen)
-    -- where
-    --     step (ht,set) (key,measure) = do
-    --         HT.insertWith mergeMeasure (Pair key measure) ht
-    --         pure (ht, Set.insert key set)
+processAll :: Int -> BS.ByteString -> (Set.Set BS.ByteString, Array Int (Element Measure))
+processAll _chunkSize fileContents = runST $ do
+    let input = map parseLine $ BC.lines fileContents
+    ht <- HT.new
+    (htFinal, setFinal) <- foldM step (ht,Set.empty) input
+    frozen <- {-# SCC "freezeHashtable" #-} freeze htFinal
+    pure (setFinal, frozen)
 
-formatOutput :: Map.Map BS.ByteString Measure -> Text
-formatOutput measurements = let
-    pairs = Map.toAscList measurements
-    equals = map (\(k,v) -> T.concat [decodeUtf8 k, "=", formatMeasure v]) pairs
+{-# SCC step #-}
+step :: forall s. (STArray s Int (Element Measure), Set.Set BS.ByteString) -> (BS.ByteString, Measure) -> ST s (STArray s Int (Element Measure), Set.Set BS.ByteString)
+step (ht,set) (key,measure) = do
+    HT.insertWith mergeMeasure (Pair key measure) ht
+    let !set' = {-# SCC "insertSet" #-} Set.union set (Set.singleton key)
+    pure (ht, set')
+
+{-# SCC formatOutput #-}
+formatOutput :: (Set.Set BS.ByteString, Array Int (Element Measure)) -> Text
+formatOutput (set, ht) = let
+    names = Set.toAscList set
+    equals = map (\name -> T.concat [decodeUtf8 name, "=", (formatMeasure $ HT.lookup name ht)]) names
     commas = T.intercalate ", " equals
     in T.concat ["{", commas, "}"]

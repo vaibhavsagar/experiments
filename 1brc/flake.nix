@@ -9,10 +9,10 @@
   outputs = {nixpkgs, flake-utils, cabal-gild-src, ...}:
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-      drv = pkgs.haskell.packages.ghc98.callCabal2nix "1brc" ./. {};
+      drv =  pkgs.haskell.packages.ghc98.callCabal2nix "1brc" ./. {};
       cabal-gild = pkgs.haskell.lib.dontCheck (pkgs.haskellPackages.callCabal2nix "cabal-gild" cabal-gild-src {});
       shell = pkgs.mkShell {
-        packages = [ pkgs.gcc pkgs.python3 cabal-gild ];
+        packages = [ cabal-gild ];
         inputsFrom = [ drv ];
       };
     in {
