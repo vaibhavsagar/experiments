@@ -11,10 +11,9 @@ import OneBRC
 main :: IO ()
 main = do
     args <- getArgs
-    when (length args < 2) $ error "no chunkSize and filename provided"
-    let chunkSize = read (head args) :: Int
-    let filename = head (tail args)
+    when (length args < 1) $ error "no chunkSize and filename provided"
+    let filename = head args
     contents <- B.readFile filename
-    let processed = processAll chunkSize contents
+    let processed = processAll contents
     let output = formatOutput processed
     TIO.putStrLn output

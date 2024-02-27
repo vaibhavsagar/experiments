@@ -75,8 +75,8 @@ mergeMeasure mA mB = Measure
     , measureCount = measureCount mA + measureCount mB
     }
 
-processAll :: Int -> BS.ByteString -> (Set.Set BS.ByteString, Array Int (Element Measure))
-processAll _chunkSize fileContents = runST $ do
+processAll :: BS.ByteString -> (Set.Set BS.ByteString, Array Int (Element Measure))
+processAll fileContents = runST $ do
     let input = map parseLine $ BC.lines fileContents
     ht <- HT.new
     (htFinal, setFinal) <- foldM step (ht,Set.empty) input
