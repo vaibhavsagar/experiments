@@ -13,10 +13,12 @@ import Control.Monad.ST
 import Data.Array (Array)
 import Data.Array.MArray (freeze)
 import Data.Array.ST (STArray)
-import Data.Char (digitToInt)
+import Data.Char (ord)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BC
-import qualified Data.Map.Strict as Map
+import Data.ByteString.Internal (c2w, w2c)
+import qualified Data.ByteString.Unsafe as BU
+-- import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -26,45 +28,42 @@ import Text.Printf
 import Hashtable as HT
 
 data Measure = Measure
-    { measureMin :: !Double
-    , measureMax :: !Double
-    , measureSum :: !Double
+    { measureMin :: !Int
+    , measureMax :: !Int
+    , measureSum :: !Int
     , measureCount :: !Int
     } deriving (Eq, Show)
-
--- foldParallel :: Int -> ([a] -> b) -> (b -> b -> b) -> [a] -> b
--- foldParallel _ fold _ [] = fold []
--- foldParallel chunkSize fold combine xs = par lf $ combine lf rf
---     where
---         (left, right) = splitAt chunkSize xs
---         lf = fold left
---         rf = foldParallel chunkSize fold combine right
 
 -- mergeMeasurementMap :: Map Text Measure -> Map Text Measure -> Map Text Measure
 -- mergeMeasurementMap = Map.unionWith mergeMeasure
 
 formatMeasure :: Measure -> Text
-formatMeasure m = T.pack $ printf "%.1f/%.1f/%.1f" (measureMin m) (measureSum m / (fromIntegral (measureCount m))) (measureMax m)
+formatMeasure m = T.pack $ printf "%.1f/%.1f/%.1f" (fromIntegral (measureMin m) / 10 :: Double) (fromIntegral (measureSum m) / (fromIntegral (10 * measureCount m)) :: Double) (fromIntegral (measureMax m) / 10 :: Double)
 
 {-# SCC parseTemp #-}
-parseTemp :: BS.ByteString -> Double
-parseTemp bs = case BC.index bs 0 of
-    '-' -> negate $ parseTemp (BC.tail bs)
-    c0 -> case BC.index bs 1 of
-        '.' -> let
-            c1 = BC.index bs 2
-            in (fromIntegral $ d2i c0) + ((fromIntegral $ d2i c1) / 10)
+parseTemp :: BS.ByteString -> Int
+parseTemp bs = case BU.unsafeIndex bs 0 of
+    -- c2w '-' == 45
+    45 -> negate $ parseTemp (BU.unsafeTail bs)
+    c0 -> case BU.unsafeIndex bs 1 of
+        -- c2w '.' == 46
+        46 -> let
+            c1 = BU.unsafeIndex bs 2
+            in (d2i c0 * 10) + (d2i c1)
         c1 -> let
-            c2 = BC.index bs 3
-            in (fromIntegral ((d2i c0 * 10) + d2i c1)) + ((fromIntegral $ d2i c2) / 10)
-    where d2i = digitToInt
+            c2 = BU.unsafeIndex bs 3
+            in (d2i c0 * 100) + (d2i c1 * 10) + (d2i c2)
+    -- c2w '0' == 48
+    where d2i c = (fromIntegral c) - 48
 
 {-# SCC parseLine #-}
 parseLine :: BS.ByteString -> (BS.ByteString, Measure)
-parseLine line = let
-    (name, rest) = BS.break (==(fromIntegral $ fromEnum ';')) line
-    m = parseTemp $ BS.tail rest
-    in (name, Measure m m m 1)
+parseLine line = case BS.elemIndex 59 line of
+    Just n -> let
+        name = BU.unsafeTake n line
+        m = parseTemp $ BU.unsafeDrop (n+1) line
+        in (name, Measure m m m 1)
+    Nothing -> error $ "no ; found in " <> show line
 
 {-# SCC mergeMeasure #-}
 mergeMeasure :: Measure -> Measure -> Measure
