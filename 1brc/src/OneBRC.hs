@@ -13,10 +13,10 @@ import Control.Monad.ST
 import Data.Array (Array)
 import Data.Array.MArray (freeze)
 import Data.Array.ST (STArray)
-import Data.Char (ord)
+-- import Data.Char (ord)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BC
-import Data.ByteString.Internal (c2w, w2c)
+-- import Data.ByteString.Internal (c2w, w2c)
 import qualified Data.ByteString.Unsafe as BU
 -- import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
@@ -85,8 +85,10 @@ processAll fileContents = runST $ do
 {-# SCC step #-}
 step :: forall s. (STArray s Int (Element Measure), Set.Set BS.ByteString) -> (BS.ByteString, Measure) -> ST s (STArray s Int (Element Measure), Set.Set BS.ByteString)
 step (ht,set) (key,measure) = do
-    HT.insertWith mergeMeasure (Pair key measure) ht
-    let !set' = {-# SCC "insertSet" #-} Set.union set (Set.singleton key)
+    newKey <- HT.insertWith mergeMeasure (Pair key measure) ht
+    let !set' = {-# SCC "insertSet" #-} if newKey
+                    then Set.union set (Set.singleton key)
+                    else set
     pure (ht, set')
 
 {-# SCC formatOutput #-}

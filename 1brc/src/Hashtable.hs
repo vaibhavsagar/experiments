@@ -59,24 +59,25 @@ lookup key ht = let
             Nothing -> error $ "not found: " ++ show key
         Empty -> error $ "not found: " ++ show key
 
-insertWith :: forall s a. (a -> a -> a) -> Pair a -> STArray s Int (Element a) -> ST s ()
+insertWith :: forall s a. (a -> a -> a) -> Pair a -> STArray s Int (Element a) -> ST s Bool
 insertWith f kv ht = do
     let idx = djb2 (pairKey kv) `mod` lENGTH
     el <- unsafeRead ht idx
-    let !modified = upsert f kv el
+    let !(modified, inserted) = upsert f kv el
     unsafeWrite ht idx modified
+    pure inserted
 
 {-# SCC upsert #-}
 {-# INLINE upsert #-}
-upsert :: (a -> a -> a) -> Pair a -> Element a -> Element a
+upsert :: (a -> a -> a) -> Pair a -> Element a -> (Element a, Bool)
 upsert f pair element = case element of
     Single presentPair
-        | pairKey presentPair == pairKey pair -> {-# SCC upsertMergeSingle #-} Single $ presentPair { pairValue =  (f (pairValue presentPair) (pairValue pair)) }
-        | otherwise -> {-# SCC upsertCollideSingle #-} Collision [pair, presentPair]
+        | pairKey presentPair == pairKey pair -> {-# SCC upsertMergeSingle #-} (Single (presentPair { pairValue =  (f (pairValue presentPair) (pairValue pair)) }), False)
+        | otherwise -> {-# SCC upsertCollideSingle #-} (Collision [pair, presentPair], True)
     Collision pairs -> case List.findIndex (\p -> pairKey pair == pairKey p) pairs of
         Just idx -> {-# SCC upsertMergeCollide #-} let
             (pre,(p:post)) = splitAt idx pairs
             p' = p { pairValue = f (pairValue p) (pairValue pair) }
-            in Collision $ pre <> (p':post)
-        Nothing -> {-# SCC upsertGrowCollide #-} Collision $ pair:pairs
-    Empty -> {-# SCC upsertInsertEmpty #-} Single pair
+            in (Collision (pre <> (p':post)), False)
+        Nothing -> {-# SCC upsertGrowCollide #-} (Collision (pair:pairs), True)
+    Empty -> {-# SCC upsertInsertEmpty #-} (Single pair, True)
