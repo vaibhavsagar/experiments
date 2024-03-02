@@ -5,10 +5,12 @@
 module OneBRC
     ( processAll
     , formatOutput
+    , makeChunks
     ) where
 
+import Control.Concurrent.Async (mapConcurrently)
 import Control.Monad (foldM)
-import Control.Monad.ST
+-- import Control.Monad.ST
 -- import GHC.Conc (par)
 -- import Data.Array (Array)
 -- import Data.Array.MArray (freeze)
@@ -16,9 +18,10 @@ import Control.Monad.ST
 -- import Data.Char (ord)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BC
--- import Data.ByteString.Internal (c2w, w2c)
+import Data.ByteString.Internal (c2w)
 import qualified Data.ByteString.Unsafe as BU
 -- import qualified Data.Map.Strict as Map
+import qualified Data.List as L
 import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -74,16 +77,23 @@ mergeMeasure mA mB = Measure
     , measureCount = measureCount mA + measureCount mB
     }
 
-processAll :: BS.ByteString -> (Set.Set BS.ByteString, HT.FrozenHashtable Measure)
-processAll fileContents = runST $ do
-    let input = map parseLine $ BC.lines fileContents
+processAll :: BS.ByteString -> IO [(Set.Set BS.ByteString, HT.FrozenHashtable Measure)]
+processAll fileContents = do
+    let chunks = makeChunks 4 fileContents
+    results <- mapConcurrently processChunk chunks
+    pure results
+
+
+processChunk :: BS.ByteString -> IO (Set.Set BS.ByteString, HT.FrozenHashtable Measure)
+processChunk fileChunk = do
+    let input = map parseLine $ BC.lines fileChunk
     ht <- HT.new
     (htFinal, setFinal) <- foldM step (ht,Set.empty) input
     frozen <- {-# SCC "freezeHashtable" #-} HT.freeze htFinal
     pure (setFinal, frozen)
 
 {-# SCC step #-}
-step :: forall s. (HT.Hashtable s Measure, Set.Set BS.ByteString) -> (BS.ByteString, Measure) -> ST s (HT.Hashtable s Measure, Set.Set BS.ByteString)
+step :: (HT.Hashtable Measure, Set.Set BS.ByteString) -> (BS.ByteString, Measure) -> IO (HT.Hashtable Measure, Set.Set BS.ByteString)
 step (ht,set) (key,measure) = do
     newKey <- HT.insertWith mergeMeasure key measure ht
     let !set' = {-# SCC "insertSet" #-} if newKey
@@ -92,9 +102,24 @@ step (ht,set) (key,measure) = do
     pure (ht, set')
 
 {-# SCC formatOutput #-}
-formatOutput :: (Set.Set BS.ByteString, HT.FrozenHashtable Measure) -> Text
-formatOutput (set, ht) = let
-    names = Set.toAscList set
-    equals = map (\name -> T.concat [decodeUtf8 name, "=", (formatMeasure $ HT.lookup name ht)]) names
+formatOutput :: [(Set.Set BS.ByteString, HT.FrozenHashtable Measure)] -> Text
+formatOutput pairs = let
+    (sets, hts) = unzip pairs
+    names = Set.toAscList $ Set.unions sets
+    measure name = L.foldl1' mergeMeasure $ map (HT.lookup name) hts
+    equals = map (\name -> T.concat [decodeUtf8 name, "=", (formatMeasure $ measure name)]) names
     commas = T.intercalate ", " equals
     in T.concat ["{", commas, "}"]
+
+makeChunks :: Int -> BS.ByteString -> [BS.ByteString]
+makeChunks _ input | BS.null input = []
+makeChunks 0 input = [input]
+makeChunks 1 input = [input]
+makeChunks n input = let
+    len = BS.length input
+    size = len `quot` n
+    bigger = BS.take size input
+    newline = BS.elemIndexEnd (c2w '\n') bigger
+    in case newline of
+        Just end -> (BS.take end input) : makeChunks (n-1) (BS.drop (end+1) input)
+        Nothing -> [input]
