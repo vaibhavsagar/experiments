@@ -11,7 +11,6 @@ import Data.Array.Base (unsafeRead, unsafeWrite)
 import Data.Array.MArray
 import Data.Array.ST
 import Data.Bits
--- import qualified Data.List as List
 import qualified Data.ByteString as BS
 
 data Hashtable s a = Hashtable
@@ -25,7 +24,7 @@ data FrozenHashtable a = FrozenHashtable
     } deriving (Eq, Show)
 
 lENGTH :: Int
-lENGTH = 10000
+lENGTH = 10007
 
 freeze :: forall s a. Hashtable s a -> ST s (FrozenHashtable a)
 freeze ht = do
@@ -34,7 +33,7 @@ freeze ht = do
     pure $ FrozenHashtable frozenKeys frozenValues
 
 djb2 :: BS.ByteString -> Int
-djb2 bs = BS.foldl' (\hash w -> (hash `shiftL` 5) + hash + (fromIntegral w)) 5381 bs
+djb2 = BS.foldl' (\hash w -> (hash `shiftL` 5) + hash + (fromIntegral w)) 5381
 
 new :: forall s a. ST s (Hashtable s a)
 new = do
@@ -46,8 +45,7 @@ lookup :: forall a. BS.ByteString -> FrozenHashtable a -> a
 lookup key ht = let
     startIdx = djb2 key `mod` lENGTH
     idx = {-# SCC lookupFindIndex #-} findIndex startIdx
-    element = (frozenHashtableValues ht) ! idx
-    in element
+    in (frozenHashtableValues ht) ! idx
     where
         findIndex idx = let
             foundKey = (frozenHashtableKeys ht) ! idx
@@ -62,8 +60,7 @@ insertWith f k v ht = do
     case present of
         True -> do
             el <- unsafeRead (hashtableValues ht) idx
-            let !modified = f el v
-            unsafeWrite (hashtableValues ht) idx modified
+            unsafeWrite (hashtableValues ht) idx $! f el v
             pure False
         False -> do
             unsafeWrite (hashtableKeys ht) idx k
@@ -73,8 +70,8 @@ insertWith f k v ht = do
         findIndex :: Int -> ST s (Int, Bool)
         findIndex idx = do
             foundKey <- unsafeRead (hashtableKeys ht) idx
-            case foundKey == k of
-                True -> pure (idx, True)
-                False
-                    | BS.null foundKey -> pure (idx, False)
-                    | otherwise -> findIndex ((idx+1) `rem` lENGTH)
+            if foundKey == k
+                then pure (idx, True)
+                else if BS.null foundKey
+                    then pure (idx, False)
+                    else findIndex ((idx+1) `rem` lENGTH)
