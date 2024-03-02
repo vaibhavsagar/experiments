@@ -10,9 +10,9 @@ module OneBRC
 import Control.Monad (foldM)
 import Control.Monad.ST
 -- import GHC.Conc (par)
-import Data.Array (Array)
-import Data.Array.MArray (freeze)
-import Data.Array.ST (STArray)
+-- import Data.Array (Array)
+-- import Data.Array.MArray (freeze)
+-- import Data.Array.ST (STArray)
 -- import Data.Char (ord)
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BC
@@ -74,25 +74,25 @@ mergeMeasure mA mB = Measure
     , measureCount = measureCount mA + measureCount mB
     }
 
-processAll :: BS.ByteString -> (Set.Set BS.ByteString, Array Int (Element Measure))
+processAll :: BS.ByteString -> (Set.Set BS.ByteString, HT.FrozenHashtable Measure)
 processAll fileContents = runST $ do
     let input = map parseLine $ BC.lines fileContents
     ht <- HT.new
     (htFinal, setFinal) <- foldM step (ht,Set.empty) input
-    frozen <- {-# SCC "freezeHashtable" #-} freeze htFinal
+    frozen <- {-# SCC "freezeHashtable" #-} HT.freeze htFinal
     pure (setFinal, frozen)
 
 {-# SCC step #-}
-step :: forall s. (STArray s Int (Element Measure), Set.Set BS.ByteString) -> (BS.ByteString, Measure) -> ST s (STArray s Int (Element Measure), Set.Set BS.ByteString)
+step :: forall s. (HT.Hashtable s Measure, Set.Set BS.ByteString) -> (BS.ByteString, Measure) -> ST s (HT.Hashtable s Measure, Set.Set BS.ByteString)
 step (ht,set) (key,measure) = do
-    newKey <- HT.insertWith mergeMeasure (Pair key measure) ht
+    newKey <- HT.insertWith mergeMeasure key measure ht
     let !set' = {-# SCC "insertSet" #-} if newKey
                     then Set.union set (Set.singleton key)
                     else set
     pure (ht, set')
 
 {-# SCC formatOutput #-}
-formatOutput :: (Set.Set BS.ByteString, Array Int (Element Measure)) -> Text
+formatOutput :: (Set.Set BS.ByteString, HT.FrozenHashtable Measure) -> Text
 formatOutput (set, ht) = let
     names = Set.toAscList set
     equals = map (\name -> T.concat [decodeUtf8 name, "=", (formatMeasure $ HT.lookup name ht)]) names
