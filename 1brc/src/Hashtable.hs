@@ -14,13 +14,13 @@ import qualified Data.List as List
 import qualified Data.ByteString as BS
 
 data Pair a = Pair
-    { pairKey :: !BS.ByteString
-    , pairValue :: !a
+    { pairKey :: {-# UNPACK #-} !BS.ByteString
+    , pairValue :: {-# UNPACK #-} !a
     } deriving (Eq, Show)
 
 data Element a
-    = Single (Pair a)
-    | Collision [Pair a]
+    = Single {-# UNPACK #-} !(Pair a)
+    | Collision {-# UNPACK #-} ![Pair a]
     | Empty
     deriving (Eq, Show)
 
@@ -33,18 +33,18 @@ djb2 bs = BS.foldl' (\hash w -> (hash `shiftL` 5) + hash + (fromIntegral w)) 538
 new :: forall s a. ST s (STArray s Int (Element a))
 new = newArray (0,lENGTH-1) Empty
 
-lookupST :: forall s a. BS.ByteString -> (STArray s Int (Element a)) -> ST s (Maybe (Pair a))
-lookupST key ht = do
-    let idx = djb2 key `mod` lENGTH
-    element <- unsafeRead ht idx
-    pure $ case element of
-        Single presentPair
-            | pairKey presentPair == key -> Just presentPair
-            | otherwise -> Nothing
-        Collision pairs -> case List.findIndex (\p -> key == pairKey p) pairs of
-            Just found -> Just $ pairs !! found
-            Nothing -> Nothing
-        Empty -> Nothing
+-- lookupST :: forall s a. BS.ByteString -> (STArray s Int (Element a)) -> ST s (Maybe (Pair a))
+-- lookupST key ht = do
+--     let idx = djb2 key `mod` lENGTH
+--     element <- unsafeRead ht idx
+--     pure $ case element of
+--         Single presentPair
+--             | pairKey presentPair == key -> Just presentPair
+--             | otherwise -> Nothing
+--         Collision pairs -> case List.findIndex (\p -> key == pairKey p) pairs of
+--             Just found -> Just $ pairs !! found
+--             Nothing -> Nothing
+--         Empty -> Nothing
 
 lookup :: forall a. BS.ByteString -> Array Int (Element a) -> a
 lookup key ht = let
