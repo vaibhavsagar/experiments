@@ -24,18 +24,18 @@ data Element a
     | Empty
     deriving (Eq, Show)
 
-uPPER_BOUND :: Int
-uPPER_BOUND = 9999
+lENGTH :: Int
+lENGTH = 10000
 
 djb2 :: BS.ByteString -> Int
 djb2 bs = BS.foldl' (\hash w -> (hash `shiftL` 5) + hash + (fromIntegral w)) 5381 bs
 
 new :: forall s a. ST s (STArray s Int (Element a))
-new = newArray (0,uPPER_BOUND) Empty
+new = newArray (0,lENGTH-1) Empty
 
 lookupST :: forall s a. BS.ByteString -> (STArray s Int (Element a)) -> ST s (Maybe (Pair a))
 lookupST key ht = do
-    let idx = djb2 key `mod` uPPER_BOUND
+    let idx = djb2 key `mod` lENGTH
     element <- unsafeRead ht idx
     pure $ case element of
         Single presentPair
@@ -48,7 +48,7 @@ lookupST key ht = do
 
 lookup :: forall a. BS.ByteString -> Array Int (Element a) -> a
 lookup key ht = let
-    idx = djb2 key `mod` uPPER_BOUND
+    idx = djb2 key `mod` lENGTH
     element = ht ! idx
     in case element of
         Single presentPair
@@ -61,7 +61,7 @@ lookup key ht = let
 
 insertWith :: forall s a. (a -> a -> a) -> Pair a -> STArray s Int (Element a) -> ST s ()
 insertWith f kv ht = do
-    let idx = djb2 (pairKey kv) `mod` uPPER_BOUND
+    let idx = djb2 (pairKey kv) `mod` lENGTH
     el <- unsafeRead ht idx
     let !modified = upsert f kv el
     unsafeWrite ht idx modified
