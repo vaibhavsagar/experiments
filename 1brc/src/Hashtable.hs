@@ -21,7 +21,7 @@ data Hashtable s a = Hashtable
 data FrozenHashtable a = FrozenHashtable
     { frozenHashtableKeys :: {-# UNPACK #-} !(Array Int BS.ByteString)
     , frozenHashtableValues :: {-# UNPACK #-} !(Array Int a)
-    } deriving (Eq, Show)
+    }
 
 lENGTH :: Int
 lENGTH = 10007
@@ -32,6 +32,7 @@ freeze ht = do
     frozenValues <- unsafeFreeze (hashtableValues ht)
     pure $ FrozenHashtable frozenKeys frozenValues
 
+{-# SCC djb2 #-}
 djb2 :: BS.ByteString -> Int
 djb2 = BS.foldl' (\hash w -> (hash `shiftL` 5) + hash + (fromIntegral w)) 5381
 
