@@ -43,37 +43,35 @@ new = do
 
 lookup :: forall a. BS.ByteString -> FrozenHashtable a -> a
 lookup key ht = let
-    startIdx = djb2 key
-    idx = {-# SCC lookupFindIndex #-} findIndex startIdx 0
+    startIdx = djb2 key `mod` lENGTH
+    idx = {-# SCC lookupFindIndex #-} findIndex startIdx
     in (frozenHashtableValues ht) ! idx
     where
-        findIndex idx offset = let
-            index = (idx+(offset*offset)) `mod` lENGTH
-            foundKey = (frozenHashtableKeys ht) ! index
+        findIndex idx = let
+            foundKey = (frozenHashtableKeys ht) ! idx
             in case foundKey == key of
-                True -> index
-                False -> findIndex idx (offset+1)
+                True -> idx
+                False -> findIndex ((idx+1) `rem` lENGTH)
 
 insertWith :: forall s a. (a -> a -> a) -> BS.ByteString -> a -> Hashtable s a -> ST s Bool
 insertWith f k v ht = do
-    let startIdx = djb2 k
-    (idx, present) <- {-# SCC insertWithFindIndex #-} findIndex startIdx 0
+    let startIdx = djb2 k `mod` lENGTH
+    (idx, present) <- {-# SCC insertWithFindIndex #-} findIndex startIdx
     case present of
-        True -> {-# SCC insertWithUpsert #-} do
+        True -> do
             el <- unsafeRead (hashtableValues ht) idx
             unsafeWrite (hashtableValues ht) idx $! f el v
             pure False
-        False -> {-# SCC insertWithInsert #-} do
+        False -> do
             unsafeWrite (hashtableKeys ht) idx k
             unsafeWrite (hashtableValues ht) idx v
             pure True
     where
-        findIndex :: Int -> Int -> ST s (Int, Bool)
-        findIndex idx offset = do
-            let index = (idx+(offset*offset)) `mod` lENGTH
-            foundKey <- unsafeRead (hashtableKeys ht) index
+        findIndex :: Int -> ST s (Int, Bool)
+        findIndex idx = do
+            foundKey <- unsafeRead (hashtableKeys ht) idx
             if foundKey == k
-                then pure (index, True)
+                then pure (idx, True)
                 else if BS.null foundKey
-                    then pure (index, False)
-                    else findIndex idx (offset+1)
+                    then pure (idx, False)
+                    else findIndex ((idx+1) `rem` lENGTH)
