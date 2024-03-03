@@ -9,16 +9,8 @@ module OneBRC
 
 import Control.Monad (foldM)
 import Control.Monad.ST
--- import GHC.Conc (par)
--- import Data.Array (Array)
--- import Data.Array.MArray (freeze)
--- import Data.Array.ST (STArray)
--- import Data.Char (ord)
 import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as BC
--- import Data.ByteString.Internal (c2w, w2c)
 import qualified Data.ByteString.Unsafe as BU
--- import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -56,15 +48,6 @@ parseTemp bs = case BU.unsafeIndex bs 0 of
     -- c2w '0' == 48
     where d2i c = (fromIntegral c) - 48
 
-{-# SCC parseLine #-}
-parseLine :: BS.ByteString -> (BS.ByteString, Measure)
-parseLine line = case BS.elemIndex 59 line of
-    Just n -> let
-        name = BU.unsafeTake n line
-        m = parseTemp $ BU.unsafeDrop (n+1) line
-        in (name, Measure m m m 1)
-    Nothing -> error $ "no ; found in " <> show line
-
 {-# SCC mergeMeasure #-}
 mergeMeasure :: Measure -> Measure -> Measure
 mergeMeasure mA mB = Measure
@@ -76,11 +59,25 @@ mergeMeasure mA mB = Measure
 
 processAll :: BS.ByteString -> (Set.Set BS.ByteString, HT.FrozenHashtable Measure)
 processAll fileContents = runST $ do
-    let input = map parseLine $ BC.lines fileContents
     ht <- HT.new
-    (htFinal, setFinal) <- foldM step (ht,Set.empty) input
+    (htFinal, setFinal) <- foldM step (ht,Set.empty) $ consume fileContents
     frozen <- {-# SCC "freezeHashtable" #-} HT.freeze htFinal
     pure (setFinal, frozen)
+
+{-# SCC consume #-}
+consume :: BS.ByteString -> [(BS.ByteString, Measure)]
+consume input
+    | BS.null input = []
+    | otherwise = case BS.elemIndex 59 input of
+        Just semicolon -> let
+            name = BU.unsafeTake semicolon input
+            rest = BU.unsafeDrop (semicolon+1) input
+            in case BS.elemIndex 10 rest of
+                Just newline -> let
+                    m = parseTemp $ BU.unsafeTake newline rest
+                    in (name, Measure m m m 1) : consume (BU.unsafeDrop (newline+1) rest)
+                Nothing -> []
+        Nothing -> []
 
 {-# SCC step #-}
 step :: forall s. (HT.Hashtable s Measure, Set.Set BS.ByteString) -> (BS.ByteString, Measure) -> ST s (HT.Hashtable s Measure, Set.Set BS.ByteString)
