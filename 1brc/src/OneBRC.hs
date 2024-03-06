@@ -31,42 +31,39 @@ data Measure = Measure
 formatMeasure :: Measure -> Text
 formatMeasure m = T.pack $ printf "%.1f/%.1f/%.1f" (fromIntegral (measureMin m) / 10 :: Double) (fromIntegral (measureSum m) / (fromIntegral (10 * measureCount m)) :: Double) (fromIntegral (measureMax m) / 10 :: Double)
 
-{-# SCC consume #-}
-consume :: BS.ByteString -> [(BS.ByteString, Measure)]
-consume input
-    | BS.null input = []
-    | otherwise = case BS.elemIndex 10 input of
-        Just len -> let
-            ones = d2i $ BU.unsafeIndex input (len-1)
-            tens = d2i $ BU.unsafeIndex input (len-3)
-            in case BU.unsafeIndex input (len-4) of
-                -- c2w ';' == 59
-                59 -> let
-                    -- ";d.d"
-                    name = BU.unsafeTake (len-4) input
-                    m = (10*tens) + ones
-                    in (name, Measure m m m 1) : consume (BU.unsafeDrop (len+1) input)
-                -- c2w '-' == 45
-                45 -> let
-                    -- ";-d.d"
-                    name = BU.unsafeTake (len-5) input
-                    m = negate $ (10*tens) + ones
-                    in (name, Measure m m m 1) : consume (BU.unsafeDrop (len+1) input)
-                hundreds -> case BU.unsafeIndex input (len-5) of
-                    -- c2w ';' == 59
-                    59 -> let
-                        -- ";dd.d"
-                        name = BU.unsafeTake (len-5) input
-                        m = (100*(d2i hundreds)) + (10*tens) + ones
-                        in (name, Measure m m m 1) : consume (BU.unsafeDrop (len+1) input)
-                    -- c2w '-' == 45
-                    45 -> let
-                        -- ";-dd.d"
-                        name = BU.unsafeTake (len-6) input
-                        m = negate $ (100*(d2i hundreds)) + (10*tens) + ones
-                        in (name, Measure m m m 1) : consume (BU.unsafeDrop (len+1) input)
-                    _ -> error $ "incorrectly formatted: " <> show input
-        Nothing -> []
+{-# SCC parseLine #-}
+parseLine :: BS.ByteString -> (BS.ByteString, Measure)
+parseLine input = let
+    len = BS.length input
+    ones = d2i $ BU.unsafeIndex input (len-1)
+    tens = 10 * (d2i $ BU.unsafeIndex input (len-3))
+    in case BU.unsafeIndex input (len-4) of
+        -- c2w ';' == 59
+        59 -> let
+            -- ";d.d"
+            name = BU.unsafeTake (len-4) input
+            m = tens + ones
+            in (name, Measure m m m 1)
+        -- c2w '-' == 45
+        45 -> let
+            -- ";-d.d"
+            name = BU.unsafeTake (len-5) input
+            m = negate $ tens + ones
+            in (name, Measure m m m 1)
+        hundreds -> case BU.unsafeIndex input (len-5) of
+            -- c2w ';' == 59
+            59 -> let
+                -- ";dd.d"
+                name = BU.unsafeTake (len-5) input
+                m = (100*(d2i hundreds)) + tens + ones
+                in (name, Measure m m m 1)
+            -- c2w '-' == 45
+            45 -> let
+                -- ";-dd.d"
+                name = BU.unsafeTake (len-6) input
+                m = negate $ (100*(d2i hundreds)) + tens + ones
+                in (name, Measure m m m 1)
+            _ -> error $ "incorrectly formatted: " <> show input
     where d2i c = (fromIntegral c) - 48
 
 {-# SCC mergeMeasure #-}
@@ -81,7 +78,7 @@ mergeMeasure mA mB = Measure
 processAll :: BS.ByteString -> (Set.Set BS.ByteString, HT.FrozenHashtable Measure)
 processAll fileContents = runST $ do
     ht <- HT.new
-    (htFinal, setFinal) <- foldM step (ht,Set.empty) $ consume fileContents
+    (htFinal, setFinal) <- foldM step (ht,Set.empty) $ map parseLine $ BC.lines fileContents
     frozen <- {-# SCC "freezeHashtable" #-} HT.freeze htFinal
     pure (setFinal, frozen)
 
