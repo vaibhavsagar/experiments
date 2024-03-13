@@ -14,13 +14,13 @@ import Data.Bits
 import qualified Data.ByteString as BS
 
 data Hashtable s a = Hashtable
-    { hashtableKeys :: {-# UNPACK #-} !(STArray s Int BS.ByteString)
-    , hashtableValues :: {-# UNPACK #-} !(STArray s Int a)
+    { hashtableKeys :: !(STArray s Int BS.ByteString)
+    , hashtableValues :: !(STArray s Int a)
     }
 
 data FrozenHashtable a = FrozenHashtable
-    { frozenHashtableKeys :: {-# UNPACK #-} !(Array Int BS.ByteString)
-    , frozenHashtableValues :: {-# UNPACK #-} !(Array Int a)
+    { frozenHashtableKeys :: !(Array Int BS.ByteString)
+    , frozenHashtableValues :: !(Array Int a)
     }
 
 lENGTH :: Int
