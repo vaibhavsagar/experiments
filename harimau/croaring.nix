@@ -3,8 +3,8 @@ let
   CRoaring = fetchFromGitHub {
     owner = "RoaringBitmap";
     repo = "CRoaring";
-    rev = "0a5c300a7a0391e5ec75465332ac7728e18b677f";
-    sha256 = "1bl99n3yavgja8051b81w9lhmd0ahzy4l7s559p3jz966c1zypqf";
+    rev = "083d39855d6ba51d3645929fcd44153a1b2f14d8";
+    sha256 = "1pvbhfgdnl5cdc4iy6g6yfsbh7ybcsd1x0dxp2pcimcrlz9581a0";
   };
 in runCommand "croaring" {
   buildInputs = [bash];

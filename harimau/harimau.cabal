@@ -99,5 +99,5 @@ test-suite harimau-test
 
     -- Test dependencies.
     build-depends:
-        base >=4.16 && <4.17,
+        base >=4.16 && <5,
         harimau
